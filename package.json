@@ -10,7 +10,11 @@
     "dev:release": "ts-node src/dev/run-release.ts",
     "build": "tsc",
     "lint": "eslint \"src/**/*.ts\" \"vitest.config.ts\"",
-    "test": "vitest"
+    "test": "vitest",
+    "test:run": "vitest run",
+    "ci": "npm run lint && npm run test:run && npm run build",
+    "sam:validate": "sam validate --lint --template-file template.yaml",
+    "sam:build": "sam build --template-file template.yaml"
   },
   "keywords": [
     "cloud",

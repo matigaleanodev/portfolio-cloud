@@ -182,6 +182,22 @@ src/
 - `npm run build`: compilacion TypeScript
 - `npm run lint`: ESLint sobre el source y la config de Vitest
 - `npm test`: suite de tests unitarios con Vitest
+- `npm run ci`: atajo local de validacion para lint, tests y build TypeScript
+- `npm run sam:validate`: valida la plantilla AWS SAM
+- `npm run sam:build`: construye artifacts Lambda mediante AWS SAM y esbuild
+
+## Infraestructura
+
+La infraestructura queda versionada en `template.yaml` usando AWS SAM.
+
+Baseline actual del stack:
+
+- una Lambda por cada entrypoint actual de automatizacion
+- una API HTTP compartida para `POST /subscriptions` y `DELETE /subscriptions`
+- variables de entorno compartidas pasadas mediante parametros del stack
+- `process-release` desplegada sin trigger publico hasta definir la integracion con el deploy de `portfolio`
+
+Las notas de arquitectura del repositorio viven en `Docs/architecture.md` y `Docs/architecture.es.md`.
 
 ## Estado
 
