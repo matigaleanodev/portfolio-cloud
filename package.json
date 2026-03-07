@@ -1,0 +1,31 @@
+{
+  "name": "portfolio-cloud",
+  "version": "0.0.1",
+  "description": "Serverless cloud automation for portfolio and blog (AWS Lambda)",
+  "keywords": [
+    "cloud",
+    "lambdas",
+    "aws",
+    "serverless"
+  ],
+  "homepage": "https://github.com/matigaleanodev/portfolio-cloud#readme",
+  "bugs": {
+    "url": "https://github.com/matigaleanodev/portfolio-cloud/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/matigaleanodev/portfolio-cloud.git"
+  },
+  "license": "ISC",
+  "author": "Matias Galeano <contacto@matiasgaleano.com.ar> (https://www.matiasgaleano.com.ar/)",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "devDependencies": {
+    "@types/node": "^25.3.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
+  }
+}
