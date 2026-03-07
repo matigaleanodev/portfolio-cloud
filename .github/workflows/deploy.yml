@@ -21,15 +21,15 @@ jobs:
 
     env:
       AWS_REGION: ${{ vars.AWS_REGION }}
-      ALLOWED_ORIGIN: ${{ vars.PORTFOLIO_ALLOWED_ORIGIN }}
-      R2_ENDPOINT: ${{ vars.R2_ENDPOINT }}
-      R2_REGION: ${{ vars.R2_REGION }}
-      R2_BUCKET: ${{ vars.R2_BUCKET }}
+      ALLOWED_ORIGIN: https://matiasgaleano.dev
+      R2_ENDPOINT: https://20804625e19c3ff733141d1fa4aa202a.r2.cloudflarestorage.com
+      R2_REGION: auto
+      R2_BUCKET: portoflio-blog-media
       R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
       R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-      OG_OBJECT_PREFIX: ${{ vars.OG_OBJECT_PREFIX }}
-      MEDIA_BASE_URL: ${{ vars.MEDIA_BASE_URL }}
-      BLOG_FROM_EMAIL: ${{ vars.BLOG_FROM_EMAIL }}
+      OG_OBJECT_PREFIX: og
+      MEDIA_BASE_URL: https://media.matiasgaleano.dev
+      BLOG_FROM_EMAIL: blog@matiasgaleano.dev
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
 
     steps:

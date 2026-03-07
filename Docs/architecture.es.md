@@ -61,18 +61,36 @@ Rutas iniciales:
 
 Estas rutas estan pensadas para ser consumidas por `portfolio`.
 
-## Estado del trigger de release
+## Trigger de release
 
-`process-release` ya esta implementada como Lambda, pero su trigger de produccion sigue intencionalmente sin definirse.
+`process-release` se despliega como Lambda interna sin exposicion por API Gateway.
 
-El mecanismo de disparo debe decidirse junto con el pipeline de deploy de `portfolio` porque impacta en:
+El flujo real de ejecucion es:
 
-- autenticacion
-- politica de reintentos
-- acoplamiento entre repositorios
-- visibilidad de fallos
+CI de `portfolio`
+-> `aws lambda invoke`
+-> `process-release`
+-> `generate-og`
+-> `notify-post`
+-> Cloudflare R2 y Resend
 
-Hasta que esa decision exista, el stack deja `process-release` desplegable pero no expuesta publicamente.
+Esto mantiene el trigger como una operacion privada del pipeline sin romper los limites actuales entre handler, orquestacion e integraciones.
+
+La Lambda acepta estas dos formas de payload:
+
+- un payload envuelto con el campo `manifest`
+- el JSON crudo del release manifest generado por `portfolio`
+
+Eso permite que el pipeline de `portfolio` invoque la funcion directamente contra `.generated/release-manifest.json` sin exponer un endpoint publico.
+
+Ejemplo de invocacion desde CI:
+
+```bash
+aws lambda invoke \
+  --function-name portfolio-dev-process-release \
+  --payload file://.generated/release-manifest.json \
+  response.json
+```
 
 ## Validacion de despliegue
 

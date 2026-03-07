@@ -196,7 +196,7 @@ Current stack baseline:
 - one Lambda per current automation entrypoint
 - one shared HTTP API for `POST /subscriptions` and `DELETE /subscriptions`
 - shared environment variables passed through stack parameters
-- `process-release` deployed without a public trigger until the portfolio deploy integration is defined
+- `process-release` deployed as an internal Lambda invoked from CI without a public endpoint
 
 The repository-level architecture notes live in `Docs/architecture.md` and `Docs/architecture.es.md`.
 
@@ -211,13 +211,6 @@ Current expected GitHub configuration for the manual deploy workflow:
 - Repository secret `R2_SECRET_ACCESS_KEY`
 - Repository secret `RESEND_API_KEY`
 - Repository variable `AWS_REGION`
-- Repository variable `PORTFOLIO_ALLOWED_ORIGIN`
-- Repository variable `R2_ENDPOINT`
-- Repository variable `R2_REGION`
-- Repository variable `R2_BUCKET`
-- Repository variable `OG_OBJECT_PREFIX`
-- Repository variable `MEDIA_BASE_URL`
-- Repository variable `BLOG_FROM_EMAIL`
 
 ## Status
 

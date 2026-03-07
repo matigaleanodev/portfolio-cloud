@@ -196,7 +196,7 @@ Baseline actual del stack:
 - una Lambda por cada entrypoint actual de automatizacion
 - una API HTTP compartida para `POST /subscriptions` y `DELETE /subscriptions`
 - variables de entorno compartidas pasadas mediante parametros del stack
-- `process-release` desplegada sin trigger publico hasta definir la integracion con el deploy de `portfolio`
+- `process-release` desplegada como Lambda interna invocada desde CI sin endpoint publico
 
 Las notas de arquitectura del repositorio viven en `Docs/architecture.md` y `Docs/architecture.es.md`.
 
@@ -211,13 +211,6 @@ Configuracion esperada actualmente en GitHub para el workflow manual de deploy:
 - Secret del repositorio `R2_SECRET_ACCESS_KEY`
 - Secret del repositorio `RESEND_API_KEY`
 - Variable del repositorio `AWS_REGION`
-- Variable del repositorio `PORTFOLIO_ALLOWED_ORIGIN`
-- Variable del repositorio `R2_ENDPOINT`
-- Variable del repositorio `R2_REGION`
-- Variable del repositorio `R2_BUCKET`
-- Variable del repositorio `OG_OBJECT_PREFIX`
-- Variable del repositorio `MEDIA_BASE_URL`
-- Variable del repositorio `BLOG_FROM_EMAIL`
 
 ## Estado
 
