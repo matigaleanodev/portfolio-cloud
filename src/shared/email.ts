@@ -7,9 +7,15 @@ export async function sendBlogNotification(
   to: string,
   title: string,
   url: string,
-) {
+): Promise<unknown> {
+  const from = process.env.BLOG_FROM_EMAIL;
+
+  if (!from) {
+    throw new Error("BLOG_FROM_EMAIL is required");
+  }
+
   return resend.emails.send({
-    from: process.env.BLOG_FROM_EMAIL!,
+    from,
     to,
     subject: `New article — ${title}`,
     html: `

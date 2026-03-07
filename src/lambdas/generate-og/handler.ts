@@ -1,8 +1,25 @@
 import { generateOgImage } from "../../shared/og";
+import {
+  jsonResponse,
+  readStringField,
+  type LambdaResponse,
+} from "../../shared/lambda";
 import { uploadObject } from "../../shared/s3";
 
-export const handler = async (event: any) => {
-  const { title, slug } = event;
+type GenerateOgEvent = {
+  title?: string;
+  slug?: string;
+};
+
+export const handler = async (
+  event: GenerateOgEvent,
+): Promise<LambdaResponse> => {
+  const title = readStringField(event.title);
+  const slug = readStringField(event.slug);
+
+  if (!title || !slug) {
+    return jsonResponse(400, { error: "Title and slug are required" });
+  }
 
   console.log("Generating OG image for:", slug);
 
@@ -16,11 +33,8 @@ export const handler = async (event: any) => {
 
   console.log("Uploaded to:", url);
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify({
-      message: "OG image generated",
-      url,
-    }),
-  };
+  return jsonResponse(200, {
+    message: "OG image generated",
+    url,
+  });
 };

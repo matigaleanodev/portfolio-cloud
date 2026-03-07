@@ -1,12 +1,11 @@
 import "dotenv/config";
-import { S3Client } from "@aws-sdk/client-s3";
-import { PutObjectCommand } from "@aws-sdk/client-s3";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 
 export async function uploadObject(
   key: string,
   body: Buffer,
   contentType: string,
-) {
+): Promise<void> {
   const bucket = process.env.R2_BUCKET!;
 
   await s3.send(
