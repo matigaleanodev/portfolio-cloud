@@ -185,6 +185,7 @@ src/
 - `npm run ci`: local validation shortcut for lint, tests, and TypeScript build
 - `npm run sam:validate`: validates the AWS SAM template
 - `npm run sam:build`: builds Lambda artifacts through AWS SAM and esbuild
+- `npm run sam:deploy:guided`: starts a guided SAM deploy for local environment setup
 
 ## Infrastructure
 
@@ -198,6 +199,25 @@ Current stack baseline:
 - `process-release` deployed without a public trigger until the portfolio deploy integration is defined
 
 The repository-level architecture notes live in `Docs/architecture.md` and `Docs/architecture.es.md`.
+
+## Deployment Inputs
+
+Real deployment still requires environment-specific values.
+
+Current expected GitHub configuration for the manual deploy workflow:
+
+- Repository secret `AWS_ROLE_TO_ASSUME`
+- Repository secret `R2_ACCESS_KEY_ID`
+- Repository secret `R2_SECRET_ACCESS_KEY`
+- Repository secret `RESEND_API_KEY`
+- Repository variable `AWS_REGION`
+- Repository variable `PORTFOLIO_ALLOWED_ORIGIN`
+- Repository variable `R2_ENDPOINT`
+- Repository variable `R2_REGION`
+- Repository variable `R2_BUCKET`
+- Repository variable `OG_OBJECT_PREFIX`
+- Repository variable `MEDIA_BASE_URL`
+- Repository variable `BLOG_FROM_EMAIL`
 
 ## Status
 
