@@ -2,6 +2,10 @@
   "name": "portfolio-cloud",
   "version": "0.0.1",
   "description": "Serverless cloud automation for portfolio and blog (AWS Lambda)",
+  "scripts": {
+    "dev": "ts-node src/dev/run-lambda.ts",
+    "build": "tsc"
+  },
   "keywords": [
     "cloud",
     "lambdas",
@@ -20,12 +24,15 @@
   "author": "Matias Galeano <contacto@matiasgaleano.com.ar> (https://www.matiasgaleano.com.ar/)",
   "type": "commonjs",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "devDependencies": {
     "@types/node": "^25.3.5",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.1004.0",
+    "dotenv": "^17.3.1",
+    "satori": "^0.25.0",
+    "sharp": "^0.34.5"
   }
 }

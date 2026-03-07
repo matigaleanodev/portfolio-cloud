@@ -15,6 +15,7 @@
     "isolatedModules": true,
     "declaration": true,
     "sourceMap": true,
+    "sourceRoot": "./src",
     "outDir": "./dist",
     "rootDir": "./src",
     "incremental": true,
