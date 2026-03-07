@@ -2,14 +2,14 @@ import {
   jsonResponse,
   parseJsonBody,
   readStringField,
-  type LambdaEvent,
-  type LambdaResponse,
 } from "../../shared/lambda";
+import { logInfo } from "../../shared/logger";
 import {
   deleteSubscriber,
   isValidSubscriberEmail,
   normalizeSubscriberEmail,
 } from "../../shared/subscribers";
+import type { LambdaEvent, LambdaResponse } from "../../shared/types";
 
 type UnsubscribeEvent = LambdaEvent & {
   email?: string;
@@ -45,7 +45,7 @@ export const handler = async (
     return jsonResponse(200, { message: "Already unsubscribed" });
   }
 
-  console.log("Unsubscribed:", normalizedEmail);
+  logInfo("Unsubscribed", { email: normalizedEmail });
 
   return jsonResponse(200, {
     message: "Unsubscribed successfully",

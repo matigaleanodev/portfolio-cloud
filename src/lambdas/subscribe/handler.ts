@@ -2,14 +2,14 @@ import {
   jsonResponse,
   parseJsonBody,
   readStringField,
-  type LambdaEvent,
-  type LambdaResponse,
 } from "../../shared/lambda";
+import { logInfo } from "../../shared/logger";
 import {
   createSubscriber,
   isValidSubscriberEmail,
   normalizeSubscriberEmail,
 } from "../../shared/subscribers";
+import type { LambdaEvent, LambdaResponse } from "../../shared/types";
 
 type SubscribeEvent = LambdaEvent & {
   email?: string;
@@ -41,7 +41,7 @@ export const handler = async (
     return jsonResponse(200, { message: "Already subscribed" });
   }
 
-  console.log("Subscribed:", email);
+  logInfo("Subscribed", { email });
 
   return jsonResponse(200, {
     message: "Subscribed successfully",

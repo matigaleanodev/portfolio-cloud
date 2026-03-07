@@ -1,12 +1,13 @@
-import "dotenv/config";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import "./env";
+import { requireEnv } from "./env";
 
 export async function uploadObject(
   key: string,
   body: Buffer,
   contentType: string,
 ): Promise<void> {
-  const bucket = process.env.R2_BUCKET!;
+  const bucket = requireEnv("R2_BUCKET");
 
   await s3.send(
     new PutObjectCommand({
@@ -20,8 +21,8 @@ export async function uploadObject(
 
 const s3Config: ConstructorParameters<typeof S3Client>[0] = {
   credentials: {
-    accessKeyId: process.env.R2_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!,
+    accessKeyId: requireEnv("R2_ACCESS_KEY_ID"),
+    secretAccessKey: requireEnv("R2_SECRET_ACCESS_KEY"),
   },
 };
 

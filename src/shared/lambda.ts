@@ -1,12 +1,6 @@
-export type LambdaResponse = {
-  statusCode: number;
-  body: string;
-};
+import type { LambdaResponse } from "./types";
 
-export type LambdaEvent = {
-  body?: string | null;
-  queryStringParameters?: Record<string, string | undefined> | null;
-};
+export type { LambdaEvent, LambdaResponse } from "./types";
 
 export function jsonResponse(
   statusCode: number,

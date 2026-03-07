@@ -4,17 +4,15 @@ import {
   ListObjectsV2Command,
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
+import { requireEnv } from "./env";
+import { logInfo } from "./logger";
 import { s3 } from "./s3";
+import type { Subscriber } from "./types";
 
-const bucket = process.env.R2_BUCKET!;
+const bucket = requireEnv("R2_BUCKET");
 const subscribersPrefix = "subscribers/";
 const subscriberFileSuffix = ".json";
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-export type SubscriberRecord = {
-  email: string;
-  createdAt: string;
-};
 
 type SubscriberDeleteResult = "deleted" | "missing";
 type SubscriberCreateResult = "created" | "exists";
@@ -67,7 +65,7 @@ export async function createSubscriber(
     return "exists";
   }
 
-  const subscriber: SubscriberRecord = {
+  const subscriber: Subscriber = {
     email: normalizedEmail,
     createdAt: new Date().toISOString(),
   };
@@ -80,6 +78,8 @@ export async function createSubscriber(
       ContentType: "application/json",
     }),
   );
+
+  logInfo("Subscriber created", { email: normalizedEmail });
 
   return "created";
 }
@@ -99,6 +99,8 @@ export async function deleteSubscriber(
       Key: buildSubscriberKey(normalizedEmail),
     }),
   );
+
+  logInfo("Subscriber deleted", { email: normalizedEmail });
 
   return "deleted";
 }

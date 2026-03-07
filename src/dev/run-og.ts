@@ -1,5 +1,4 @@
-import "dotenv/config";
-
+import "../shared/env";
 import { handler } from "../lambdas/generate-og/handler";
 
 async function run() {

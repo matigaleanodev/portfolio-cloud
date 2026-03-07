@@ -7,6 +7,7 @@
     "dev:notify": "ts-node src/dev/run-notify.ts",
     "dev:subscribe": "ts-node src/dev/run-subscribe.ts",
     "dev:unsubscribe": "ts-node src/dev/run-unsubscribe.ts",
+    "dev:release": "ts-node src/dev/run-release.ts",
     "build": "tsc",
     "lint": "eslint \"src/**/*.ts\" \"vitest.config.ts\"",
     "test": "vitest"

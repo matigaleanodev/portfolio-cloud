@@ -1,11 +1,5 @@
 import sharp from "sharp";
-
-type OgImageInput = {
-  title: string;
-  excerpt?: string;
-  tags?: string[];
-  date?: string;
-};
+import type { OgGenerationInput } from "./types";
 
 const palette = {
   background: "#e5e7eb",
@@ -56,7 +50,7 @@ export async function generateOgImage({
   excerpt,
   tags = [],
   date,
-}: OgImageInput): Promise<Buffer> {
+}: Omit<OgGenerationInput, "slug">): Promise<Buffer> {
   const width = 1200;
   const height = 630;
   const safeTitle = escapeXml(truncate(title, 96));

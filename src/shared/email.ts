@@ -1,15 +1,12 @@
-import "dotenv/config";
 import { Resend } from "resend";
+import "./env";
+import { requireEnv } from "./env";
+import type { NotifyPostInput } from "./types";
 
-export const resend = new Resend(process.env.RESEND_API_KEY);
+export const resend = new Resend(requireEnv("RESEND_API_KEY"));
 
-type BlogNotificationInput = {
+type BlogNotificationInput = NotifyPostInput & {
   to: string;
-  title: string;
-  url: string;
-  excerpt?: string;
-  date?: string;
-  tags?: string[];
 };
 
 function escapeHtml(value: string): string {
@@ -42,7 +39,7 @@ function formatDateLabel(date?: string): string | null {
 export async function sendBlogNotification(
   input: BlogNotificationInput,
 ): Promise<unknown> {
-  const from = process.env.BLOG_FROM_EMAIL;
+  const from = requireEnv("BLOG_FROM_EMAIL");
   const safeTitle = escapeHtml(input.title);
   const safeUrl = escapeHtml(input.url);
   const safeExcerpt = input.excerpt ? escapeHtml(input.excerpt) : null;
@@ -57,10 +54,6 @@ export async function sendBlogNotification(
       `,
     )
     .join("");
-
-  if (!from) {
-    throw new Error("BLOG_FROM_EMAIL is required");
-  }
 
   return resend.emails.send({
     from,
