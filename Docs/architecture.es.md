@@ -48,6 +48,13 @@ El stack inicial define:
 - variables de entorno de runtime centralizadas mediante parametros del stack
 - empaquetado con `esbuild` conducido por metadata de SAM
 
+Naming actual de despliegue:
+
+- nombre del stack para el ambiente activo: `portfolio-cloud-dev`
+- patron de nombres de Lambda: `portfolio-cloud-<environment>-<service>`
+- ambiente actual: `dev`
+- nombre previsto del stack de produccion: `portfolio-cloud-prod`
+
 Esto mantiene los contratos de despliegue cerca de los handlers reales sin introducir un repositorio de infraestructura separado.
 
 ## Superficie publica de API
@@ -87,7 +94,7 @@ Ejemplo de invocacion desde CI:
 
 ```bash
 aws lambda invoke \
-  --function-name portfolio-dev-process-release \
+  --function-name portfolio-cloud-dev-process-release \
   --payload file://.generated/release-manifest.json \
   response.json
 ```
