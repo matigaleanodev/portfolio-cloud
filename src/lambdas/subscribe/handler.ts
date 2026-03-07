@@ -1,4 +1,3 @@
-import { getSubscribers, saveSubscribers } from "../../shared/subscribers";
 import {
   jsonResponse,
   parseJsonBody,
@@ -6,6 +5,11 @@ import {
   type LambdaEvent,
   type LambdaResponse,
 } from "../../shared/lambda";
+import {
+  createSubscriber,
+  isValidSubscriberEmail,
+  normalizeSubscriberEmail,
+} from "../../shared/subscribers";
 
 type SubscribeEvent = LambdaEvent & {
   email?: string;
@@ -20,23 +24,27 @@ function getEmail(event: SubscribeEvent): string | undefined {
 export const handler = async (
   event: SubscribeEvent,
 ): Promise<LambdaResponse> => {
-  const email = getEmail(event)?.trim().toLowerCase();
+  const rawEmail = getEmail(event);
+  const email = rawEmail ? normalizeSubscriberEmail(rawEmail) : "";
 
   if (!email) {
     return jsonResponse(400, { error: "Email required" });
   }
 
-  const subscribers = await getSubscribers();
+  if (!isValidSubscriberEmail(email)) {
+    return jsonResponse(400, { error: "Invalid email" });
+  }
 
-  if (subscribers.includes(email)) {
+  const result = await createSubscriber(email);
+
+  if (result === "exists") {
     return jsonResponse(200, { message: "Already subscribed" });
   }
 
-  subscribers.push(email);
-
-  await saveSubscribers(subscribers);
-
   console.log("Subscribed:", email);
 
-  return jsonResponse(200, { message: "Subscribed successfully" });
+  return jsonResponse(200, {
+    message: "Subscribed successfully",
+    email,
+  });
 };

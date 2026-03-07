@@ -4,6 +4,7 @@ import {
   readStringField,
   type LambdaResponse,
 } from "../../shared/lambda";
+import { listSubscriberEmails } from "../../shared/subscribers";
 
 type NotifyPostEvent = {
   title?: string;
@@ -22,11 +23,18 @@ export const handler = async (
 
   console.log("Sending notification for post:", title);
 
-  await sendBlogNotification("contacto@matiasgaleano.dev", title, url);
+  const subscribers = await listSubscriberEmails();
+
+  await Promise.all(
+    subscribers.map(async (subscriberEmail) =>
+      sendBlogNotification(subscriberEmail, title, url),
+    ),
+  );
 
   return jsonResponse(200, {
     message: "Notification sent",
     title,
     url,
+    recipients: subscribers.length,
   });
 };

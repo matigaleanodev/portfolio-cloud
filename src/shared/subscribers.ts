@@ -1,70 +1,152 @@
-import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
-import type { Readable } from "node:stream";
+import {
+  DeleteObjectCommand,
+  HeadObjectCommand,
+  ListObjectsV2Command,
+  PutObjectCommand,
+} from "@aws-sdk/client-s3";
 import { s3 } from "./s3";
 
 const bucket = process.env.R2_BUCKET!;
-const key = "subscribers/subscribers.json";
+const subscribersPrefix = "subscribers/";
+const subscriberFileSuffix = ".json";
+const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-type StringReadable =
-  | Readable
-  | {
-      transformToString?: (encoding?: string) => Promise<string>;
-    };
+export type SubscriberRecord = {
+  email: string;
+  createdAt: string;
+};
 
-function hasTransformToString(
-  stream: StringReadable,
-): stream is { transformToString: (encoding?: string) => Promise<string> } {
-  return "transformToString" in stream && typeof stream.transformToString === "function";
+type SubscriberDeleteResult = "deleted" | "missing";
+type SubscriberCreateResult = "created" | "exists";
+
+export function normalizeSubscriberEmail(email: string): string {
+  return decodeURIComponent(email).trim().toLowerCase();
 }
 
-async function streamToString(stream: StringReadable): Promise<string> {
-  if (hasTransformToString(stream)) {
-    return stream.transformToString("utf-8");
+export function isValidSubscriberEmail(email: string): boolean {
+  return emailPattern.test(email);
+}
+
+export function buildSubscriberKey(email: string): string {
+  return `${subscribersPrefix}${normalizeSubscriberEmail(email)}${subscriberFileSuffix}`;
+}
+
+function isObjectNotFoundError(error: unknown): boolean {
+  if (!(error instanceof Error)) {
+    return false;
   }
 
-  const chunks: Buffer[] = [];
-  const readableStream = stream as Readable;
-
-  for await (const chunk of readableStream) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-  }
-
-  return Buffer.concat(chunks).toString("utf-8");
+  return error.name === "NotFound" || error.name === "NoSuchKey";
 }
 
-function isStringArray(value: unknown): value is string[] {
-  return Array.isArray(value) && value.every((item) => typeof item === "string");
-}
-
-export async function getSubscribers(): Promise<string[]> {
+export async function subscriberExists(email: string): Promise<boolean> {
   try {
-    const res = await s3.send(
-      new GetObjectCommand({
+    await s3.send(
+      new HeadObjectCommand({
         Bucket: bucket,
-        Key: key,
+        Key: buildSubscriberKey(email),
       }),
     );
 
-    if (!res.Body) {
-      return [];
+    return true;
+  } catch (error) {
+    if (isObjectNotFoundError(error)) {
+      return false;
     }
 
-    const body = await streamToString(res.Body);
-    const parsed: unknown = JSON.parse(body);
-
-    return isStringArray(parsed) ? parsed : [];
-  } catch {
-    return [];
+    throw error;
   }
 }
 
-export async function saveSubscribers(list: string[]): Promise<void> {
+export async function createSubscriber(
+  email: string,
+): Promise<SubscriberCreateResult> {
+  const normalizedEmail = normalizeSubscriberEmail(email);
+
+  if (await subscriberExists(normalizedEmail)) {
+    return "exists";
+  }
+
+  const subscriber: SubscriberRecord = {
+    email: normalizedEmail,
+    createdAt: new Date().toISOString(),
+  };
+
   await s3.send(
     new PutObjectCommand({
       Bucket: bucket,
-      Key: key,
-      Body: JSON.stringify(list, null, 2),
+      Key: buildSubscriberKey(normalizedEmail),
+      Body: JSON.stringify(subscriber, null, 2),
       ContentType: "application/json",
     }),
   );
+
+  return "created";
+}
+
+export async function deleteSubscriber(
+  email: string,
+): Promise<SubscriberDeleteResult> {
+  const normalizedEmail = normalizeSubscriberEmail(email);
+
+  if (!(await subscriberExists(normalizedEmail))) {
+    return "missing";
+  }
+
+  await s3.send(
+    new DeleteObjectCommand({
+      Bucket: bucket,
+      Key: buildSubscriberKey(normalizedEmail),
+    }),
+  );
+
+  return "deleted";
+}
+
+function parseSubscriberEmailFromKey(key: string): string | null {
+  if (!key.startsWith(subscribersPrefix) || !key.endsWith(subscriberFileSuffix)) {
+    return null;
+  }
+
+  const email = key.slice(
+    subscribersPrefix.length,
+    key.length - subscriberFileSuffix.length,
+  );
+
+  return email || null;
+}
+
+export async function listSubscriberEmails(): Promise<string[]> {
+  const emails = new Set<string>();
+  let continuationToken: string | undefined;
+
+  do {
+    const response = await s3.send(
+      new ListObjectsV2Command({
+        Bucket: bucket,
+        Prefix: subscribersPrefix,
+        ContinuationToken: continuationToken,
+      }),
+    );
+
+    for (const object of response.Contents ?? []) {
+      const key = object.Key;
+
+      if (!key) {
+        continue;
+      }
+
+      const email = parseSubscriberEmailFromKey(key);
+
+      if (email) {
+        emails.add(email);
+      }
+    }
+
+    continuationToken = response.IsTruncated
+      ? response.NextContinuationToken
+      : undefined;
+  } while (continuationToken);
+
+  return [...emails];
 }

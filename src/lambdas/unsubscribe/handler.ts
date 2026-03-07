@@ -1,4 +1,3 @@
-import { getSubscribers, saveSubscribers } from "../../shared/subscribers";
 import {
   jsonResponse,
   parseJsonBody,
@@ -6,6 +5,11 @@ import {
   type LambdaEvent,
   type LambdaResponse,
 } from "../../shared/lambda";
+import {
+  deleteSubscriber,
+  isValidSubscriberEmail,
+  normalizeSubscriberEmail,
+} from "../../shared/subscribers";
 
 type UnsubscribeEvent = LambdaEvent & {
   email?: string;
@@ -25,23 +29,26 @@ export const handler = async (
   event: UnsubscribeEvent,
 ): Promise<LambdaResponse> => {
   const rawEmail = getEmail(event);
-  const normalizedEmail = rawEmail
-    ? decodeURIComponent(rawEmail).trim().toLowerCase()
-    : "";
+  const normalizedEmail = rawEmail ? normalizeSubscriberEmail(rawEmail) : "";
 
   if (!normalizedEmail) {
     return jsonResponse(400, { error: "Email required" });
   }
 
-  const subscribers = await getSubscribers();
+  if (!isValidSubscriberEmail(normalizedEmail)) {
+    return jsonResponse(400, { error: "Invalid email" });
+  }
 
-  const updated = subscribers.filter(
-    (subscriber: string) => subscriber.toLowerCase() !== normalizedEmail,
-  );
+  const result = await deleteSubscriber(normalizedEmail);
 
-  await saveSubscribers(updated);
+  if (result === "missing") {
+    return jsonResponse(200, { message: "Already unsubscribed" });
+  }
 
   console.log("Unsubscribed:", normalizedEmail);
 
-  return jsonResponse(200, { message: "Unsubscribed successfully" });
+  return jsonResponse(200, {
+    message: "Unsubscribed successfully",
+    email: normalizedEmail,
+  });
 };
