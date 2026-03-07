@@ -3,7 +3,8 @@
   "version": "0.0.1",
   "description": "Serverless cloud automation for portfolio and blog (AWS Lambda)",
   "scripts": {
-    "dev": "ts-node src/dev/run-lambda.ts",
+    "dev:og": "ts-node src/dev/run-og.ts",
+    "dev:notify": "ts-node src/dev/run-notify.ts",
     "build": "tsc"
   },
   "keywords": [
@@ -32,6 +33,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1004.0",
     "dotenv": "^17.3.1",
+    "resend": "^6.9.3",
     "satori": "^0.25.0",
     "sharp": "^0.34.5"
   }
