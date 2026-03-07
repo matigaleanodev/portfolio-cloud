@@ -9,6 +9,9 @@ import { uploadObject } from "../../shared/s3";
 type GenerateOgEvent = {
   title?: string;
   slug?: string;
+  excerpt?: string;
+  date?: string;
+  tags?: string[];
 };
 
 export const handler = async (
@@ -16,6 +19,11 @@ export const handler = async (
 ): Promise<LambdaResponse> => {
   const title = readStringField(event.title);
   const slug = readStringField(event.slug);
+  const excerpt = readStringField(event.excerpt);
+  const date = readStringField(event.date);
+  const tags = Array.isArray(event.tags)
+    ? event.tags.filter((tag): tag is string => typeof tag === "string" && tag.trim().length > 0)
+    : [];
 
   if (!title || !slug) {
     return jsonResponse(400, { error: "Title and slug are required" });
@@ -23,7 +31,14 @@ export const handler = async (
 
   console.log("Generating OG image for:", slug);
 
-  const image = await generateOgImage(title);
+  const ogInput = {
+    title,
+    tags,
+    ...(excerpt ? { excerpt } : {}),
+    ...(date ? { date } : {}),
+  };
+
+  const image = await generateOgImage(ogInput);
 
   const key = `${process.env.OG_OBJECT_PREFIX}/${slug}.png`;
 
