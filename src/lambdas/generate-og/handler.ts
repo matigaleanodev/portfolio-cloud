@@ -1,5 +1,5 @@
 import { generateOgImage } from "../../shared/og";
-import fs from "fs";
+import { uploadObject } from "../../shared/s3";
 
 export const handler = async (event: any) => {
   const { title, slug } = event;
@@ -8,15 +8,19 @@ export const handler = async (event: any) => {
 
   const image = await generateOgImage(title);
 
-  fs.writeFileSync(`og-${slug}.png`, image);
+  const key = `${process.env.OG_OBJECT_PREFIX}/${slug}.png`;
 
-  console.log("Image generated:", image.length, "bytes");
+  await uploadObject(key, image, "image/png");
+
+  const url = `${process.env.MEDIA_BASE_URL}/${key}`;
+
+  console.log("Uploaded to:", url);
 
   return {
     statusCode: 200,
     body: JSON.stringify({
       message: "OG image generated",
-      slug,
+      url,
     }),
   };
 };

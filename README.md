@@ -41,6 +41,19 @@ Expected responsibilities:
 - Runtime modules should stay separated from orchestration and provider integrations.
 - Lambda handlers should remain idempotent and explicit about input validation and error handling.
 
+## Environment Variables
+
+For OG generation and upload to Cloudflare R2, the project currently expects these variables:
+
+- `R2_ENDPOINT`: S3-compatible R2 endpoint, for example `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`
+- `R2_REGION`: use `auto`
+- `R2_BUCKET`: target bucket for generated OG assets
+- `R2_ACCESS_KEY_ID`: R2 S3 access key id
+- `R2_SECRET_ACCESS_KEY`: R2 S3 secret access key
+- `OG_OBJECT_PREFIX`: object prefix inside the bucket, for example `og`
+
+Use `.env.example` as the local template.
+
 ## Suggested Structure
 
 ```text

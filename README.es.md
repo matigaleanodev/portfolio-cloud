@@ -41,6 +41,19 @@ Responsabilidades esperadas:
 - Los modulos de runtime deben mantenerse separados de la orquestacion y de las integraciones con proveedores.
 - Los handlers de Lambda deben seguir siendo idempotentes y explicitos en validacion de entrada y manejo de errores.
 
+## Variables de entorno
+
+Para generacion de OG y subida a Cloudflare R2, el proyecto espera actualmente estas variables:
+
+- `R2_ENDPOINT`: endpoint S3-compatible de R2, por ejemplo `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`
+- `R2_REGION`: usar `auto`
+- `R2_BUCKET`: bucket destino para los assets OG generados
+- `R2_ACCESS_KEY_ID`: access key id del API S3 de R2
+- `R2_SECRET_ACCESS_KEY`: secret access key del API S3 de R2
+- `OG_OBJECT_PREFIX`: prefijo de objetos dentro del bucket, por ejemplo `og`
+
+Usa `.env.example` como plantilla local.
+
 ## Estructura sugerida
 
 ```text
