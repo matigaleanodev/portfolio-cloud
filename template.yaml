@@ -124,18 +124,6 @@ Resources:
         OutExtension:
           - .js=.js
 
-  SharpLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: !Sub portfolio-cloud-${StageName}-sharp
-      Description: Native sharp runtime for OG generation.
-      ContentUri: layers/sharp
-      CompatibleRuntimes:
-        - nodejs22.x
-      CompatibleArchitectures:
-        - x86_64
-      RetentionPolicy: Delete
-
   GenerateOgFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -145,8 +133,6 @@ Resources:
       Description: Generates Open Graph images for published portfolio content.
       Timeout: 30
       MemorySize: 1024
-      Layers:
-        - !Ref SharpLayer
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
@@ -154,7 +140,7 @@ Resources:
         EntryPoints:
           - src/lambdas/generate-og/handler.ts
         External:
-          - sharp
+          - "@resvg/resvg-js"
         Minify: true
         Sourcemap: true
         Target: es2022
@@ -221,6 +207,3 @@ Outputs:
   ProcessReleaseFunctionName:
     Description: Deployed Lambda function name for release processing.
     Value: !Ref ProcessReleaseFunction
-  SharpLayerArn:
-    Description: Deployed Lambda layer ARN for sharp.
-    Value: !Ref SharpLayer
