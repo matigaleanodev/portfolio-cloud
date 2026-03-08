@@ -197,6 +197,7 @@ Current stack baseline:
 - one shared HTTP API for `POST /subscriptions` and `DELETE /subscriptions`
 - shared environment variables passed through stack parameters
 - `process-release` deployed as an internal Lambda invoked from CI without a public endpoint
+- deploy artifacts stored in the dedicated bucket `portfolio-cloud-dev-artifacts`
 
 The repository-level architecture notes live in `Docs/architecture.md` and `Docs/architecture.es.md`.
 
@@ -211,6 +212,10 @@ Current expected GitHub configuration for the manual deploy workflow:
 - Repository secret `R2_SECRET_ACCESS_KEY`
 - Repository secret `RESEND_API_KEY`
 - Repository variable `AWS_REGION`
+
+AWS prerequisites for the current deploy flow:
+
+- S3 bucket `portfolio-cloud-dev-artifacts` in `us-east-2`
 
 ## Status
 
