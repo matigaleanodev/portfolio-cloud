@@ -51,3 +51,5 @@ export type NotifyPostEvent = Partial<NotifyPostInput>;
 export type ProcessReleaseEvent = {
   manifest?: ReleaseManifest;
 };
+
+export type ProcessReleaseInvocation = ProcessReleaseEvent | ReleaseManifest;

@@ -182,6 +182,35 @@ src/
 - `npm run build`: compilacion TypeScript
 - `npm run lint`: ESLint sobre el source y la config de Vitest
 - `npm test`: suite de tests unitarios con Vitest
+- `npm run ci`: atajo local de validacion para lint, tests y build TypeScript
+- `npm run sam:validate`: valida la plantilla AWS SAM
+- `npm run sam:build`: construye artifacts Lambda mediante AWS SAM y esbuild
+- `npm run sam:deploy:guided`: inicia un deploy guiado de SAM para preparar un ambiente local
+
+## Infraestructura
+
+La infraestructura queda versionada en `template.yaml` usando AWS SAM.
+
+Baseline actual del stack:
+
+- una Lambda por cada entrypoint actual de automatizacion
+- una API HTTP compartida para `POST /subscriptions` y `DELETE /subscriptions`
+- variables de entorno compartidas pasadas mediante parametros del stack
+- `process-release` desplegada como Lambda interna invocada desde CI sin endpoint publico
+
+Las notas de arquitectura del repositorio viven en `Docs/architecture.md` y `Docs/architecture.es.md`.
+
+## Inputs de despliegue
+
+El despliegue real sigue requiriendo valores especificos por ambiente.
+
+Configuracion esperada actualmente en GitHub para el workflow manual de deploy:
+
+- Secret del repositorio `AWS_ROLE_TO_ASSUME`
+- Secret del repositorio `R2_ACCESS_KEY_ID`
+- Secret del repositorio `R2_SECRET_ACCESS_KEY`
+- Secret del repositorio `RESEND_API_KEY`
+- Variable del repositorio `AWS_REGION`
 
 ## Estado
 

@@ -1,0 +1,89 @@
+name: deploy
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: Deployment stage name
+        required: true
+        default: dev
+      stack_name:
+        description: CloudFormation stack name
+        required: true
+        default: portfolio-cloud-dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    env:
+      AWS_REGION: ${{ vars.AWS_REGION }}
+      ALLOWED_ORIGIN: https://matiasgaleano.dev
+      R2_ENDPOINT: https://20804625e19c3ff733141d1fa4aa202a.r2.cloudflarestorage.com
+      R2_REGION: auto
+      R2_BUCKET: portoflio-blog-media
+      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+      OG_OBJECT_PREFIX: og
+      MEDIA_BASE_URL: https://media.matiasgaleano.dev
+      BLOG_FROM_EMAIL: blog@matiasgaleano.dev
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      DEPLOY_STAGE: ${{ github.event.inputs.stage || 'dev' }}
+      STACK_NAME: ${{ github.event.inputs.stack_name || 'portfolio-cloud-dev' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Setup AWS SAM
+        uses: aws-actions/setup-sam@v2
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Validate application
+        run: npm run ci
+
+      - name: Build SAM application
+        run: npm run sam:build
+
+      - name: Deploy SAM stack
+        run: >
+          sam deploy
+          --template-file .aws-sam/build/template.yaml
+          --stack-name "${STACK_NAME}"
+          --region "${AWS_REGION}"
+          --resolve-s3
+          --capabilities CAPABILITY_IAM
+          --no-confirm-changeset
+          --no-fail-on-empty-changeset
+          --parameter-overrides
+          "StageName=${DEPLOY_STAGE}"
+          "AllowedOrigin=${ALLOWED_ORIGIN}"
+          "R2Endpoint=${R2_ENDPOINT}"
+          "R2Region=${R2_REGION}"
+          "R2Bucket=${R2_BUCKET}"
+          "R2AccessKeyId=${R2_ACCESS_KEY_ID}"
+          "R2SecretAccessKey=${R2_SECRET_ACCESS_KEY}"
+          "OgObjectPrefix=${OG_OBJECT_PREFIX}"
+          "MediaBaseUrl=${MEDIA_BASE_URL}"
+          "BlogFromEmail=${BLOG_FROM_EMAIL}"
+          "ResendApiKey=${RESEND_API_KEY}"

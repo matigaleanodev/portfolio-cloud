@@ -72,6 +72,42 @@ describe("process-release handler", () => {
     expect(notifyPostHandlerMock).not.toHaveBeenCalled();
   });
 
+  it("accepts a raw release manifest payload for direct CI invocation", async () => {
+    sendMock
+      .mockRejectedValueOnce(Object.assign(new Error("missing"), { name: "NotFound" }))
+      .mockResolvedValueOnce({});
+    generateOgHandlerMock.mockResolvedValue({
+      statusCode: 200,
+      body: JSON.stringify({ message: "OG image generated" }),
+    });
+    notifyPostHandlerMock.mockResolvedValue({
+      statusCode: 200,
+      body: JSON.stringify({ message: "Notification sent" }),
+    });
+
+    const { handler } = await import("./handler");
+
+    await expect(
+      handler({
+        generatedAt: "2026-03-07T15:00:00Z",
+        siteUrl: "https://matiasgaleano.dev",
+        content: {
+          posts: [
+            {
+              slug: "arquitectura-modo-playa",
+              title: "Como disene la arquitectura de Modo Playa",
+              date: "2026-03-07",
+              canonicalPath: "/blog/arquitectura-modo-playa",
+            },
+          ],
+        },
+      }),
+    ).resolves.toEqual({
+      statusCode: 200,
+      body: JSON.stringify({ processedPosts: ["arquitectura-modo-playa"] }),
+    });
+  });
+
   it("processes new posts and persists updated state", async () => {
     sendMock
       .mockResolvedValueOnce({
