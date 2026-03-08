@@ -116,5 +116,6 @@ Current deploy contract:
 - artifacts prefix: `sam`
 - native dependencies are built on the Linux CI runner through `sam build`
 - `sharp` stays external to the esbuild bundle for the OG Lambda runtime
+- the deploy workflow prepares `sharp` explicitly for `linux-x64` before `sam build`
 
 Real deployment still requires environment-specific AWS and provider values that should not be hardcoded in versioned files.

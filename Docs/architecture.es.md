@@ -116,5 +116,6 @@ Contrato actual de deploy:
 - prefijo de artifacts: `sam`
 - las dependencias nativas se construyen en el runner Linux de CI mediante `sam build`
 - `sharp` queda externo al bundle de esbuild para el runtime de la Lambda OG
+- el workflow de deploy prepara `sharp` explicitamente para `linux-x64` antes de `sam build`
 
 El despliegue real sigue requiriendo valores de AWS y de proveedores por ambiente, que no deben quedar hardcodeados en archivos versionados.

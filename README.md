@@ -187,6 +187,8 @@ src/
 - `npm run sam:build`: builds Lambda artifacts through AWS SAM and esbuild on the Linux CI runner
 - `npm run sam:deploy:guided`: starts a guided SAM deploy for local environment setup
 
+The deploy workflow prepares `sharp` explicitly for the Lambda `linux-x64` runtime before building SAM artifacts.
+
 ## Infrastructure
 
 Infrastructure is versioned in `template.yaml` using AWS SAM.
