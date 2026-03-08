@@ -2,8 +2,7 @@ import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const sendMock = vi.fn();
-const generateOgHandlerMock = vi.fn();
-const notifyPostHandlerMock = vi.fn();
+const invokeLambdaMock = vi.fn();
 
 vi.mock("../../shared/s3", () => ({
   s3: {
@@ -11,12 +10,9 @@ vi.mock("../../shared/s3", () => ({
   },
 }));
 
-vi.mock("../generate-og/handler", () => ({
-  handler: generateOgHandlerMock,
-}));
-
-vi.mock("../notify-post/handler", () => ({
-  handler: notifyPostHandlerMock,
+vi.mock("../../shared/invoke-lambda", () => ({
+  invokeLambda: invokeLambdaMock,
+  assertLambdaSuccess: vi.fn(),
 }));
 
 describe("process-release handler", () => {
@@ -24,6 +20,8 @@ describe("process-release handler", () => {
     vi.resetModules();
     vi.clearAllMocks();
     process.env.R2_BUCKET = "test-bucket";
+    process.env.GENERATE_OG_FUNCTION_NAME = "portfolio-cloud-dev-generate-og";
+    process.env.NOTIFY_POST_FUNCTION_NAME = "portfolio-cloud-dev-notify-post";
   });
 
   it("returns 400 when the manifest is invalid", async () => {
@@ -68,22 +66,22 @@ describe("process-release handler", () => {
       body: JSON.stringify({ message: "No new posts" }),
     });
 
-    expect(generateOgHandlerMock).not.toHaveBeenCalled();
-    expect(notifyPostHandlerMock).not.toHaveBeenCalled();
+    expect(invokeLambdaMock).not.toHaveBeenCalled();
   });
 
   it("accepts a raw release manifest payload for direct CI invocation", async () => {
     sendMock
       .mockRejectedValueOnce(Object.assign(new Error("missing"), { name: "NotFound" }))
       .mockResolvedValueOnce({});
-    generateOgHandlerMock.mockResolvedValue({
-      statusCode: 200,
-      body: JSON.stringify({ message: "OG image generated" }),
-    });
-    notifyPostHandlerMock.mockResolvedValue({
-      statusCode: 200,
-      body: JSON.stringify({ message: "Notification sent" }),
-    });
+    invokeLambdaMock
+      .mockResolvedValueOnce({
+        statusCode: 200,
+        body: JSON.stringify({ message: "OG image generated" }),
+      })
+      .mockResolvedValueOnce({
+        statusCode: 200,
+        body: JSON.stringify({ message: "Notification sent" }),
+      });
 
     const { handler } = await import("./handler");
 
@@ -116,14 +114,15 @@ describe("process-release handler", () => {
         },
       })
       .mockResolvedValueOnce({});
-    generateOgHandlerMock.mockResolvedValue({
-      statusCode: 200,
-      body: JSON.stringify({ message: "OG image generated" }),
-    });
-    notifyPostHandlerMock.mockResolvedValue({
-      statusCode: 200,
-      body: JSON.stringify({ message: "Notification sent" }),
-    });
+    invokeLambdaMock
+      .mockResolvedValueOnce({
+        statusCode: 200,
+        body: JSON.stringify({ message: "OG image generated" }),
+      })
+      .mockResolvedValueOnce({
+        statusCode: 200,
+        body: JSON.stringify({ message: "Notification sent" }),
+      });
 
     const { handler } = await import("./handler");
 
@@ -161,16 +160,24 @@ describe("process-release handler", () => {
       body: JSON.stringify({ processedPosts: ["c"] }),
     });
 
-    expect(generateOgHandlerMock).toHaveBeenCalledWith({
-      slug: "c",
-      title: "Post C",
-      date: "2026-03-07",
-    });
-    expect(notifyPostHandlerMock).toHaveBeenCalledWith({
-      title: "Post C",
-      url: "https://matiasgaleano.dev/blog/c",
-      date: "2026-03-07",
-    });
+    expect(invokeLambdaMock).toHaveBeenNthCalledWith(
+      1,
+      "portfolio-cloud-dev-generate-og",
+      {
+        slug: "c",
+        title: "Post C",
+        date: "2026-03-07",
+      },
+    );
+    expect(invokeLambdaMock).toHaveBeenNthCalledWith(
+      2,
+      "portfolio-cloud-dev-notify-post",
+      {
+        title: "Post C",
+        url: "https://matiasgaleano.dev/blog/c",
+        date: "2026-03-07",
+      },
+    );
 
     expect(sendMock.mock.calls[0]?.[0]).toBeInstanceOf(GetObjectCommand);
     expect(sendMock.mock.calls[1]?.[0]).toBeInstanceOf(PutObjectCommand);
@@ -189,14 +196,15 @@ describe("process-release handler", () => {
     sendMock
       .mockRejectedValueOnce(Object.assign(new Error("missing"), { name: "NotFound" }))
       .mockResolvedValueOnce({});
-    generateOgHandlerMock.mockResolvedValue({
-      statusCode: 200,
-      body: JSON.stringify({ message: "OG image generated" }),
-    });
-    notifyPostHandlerMock.mockResolvedValue({
-      statusCode: 200,
-      body: JSON.stringify({ message: "Notification sent" }),
-    });
+    invokeLambdaMock
+      .mockResolvedValueOnce({
+        statusCode: 200,
+        body: JSON.stringify({ message: "OG image generated" }),
+      })
+      .mockResolvedValueOnce({
+        statusCode: 200,
+        body: JSON.stringify({ message: "Notification sent" }),
+      });
 
     const { handler } = await import("./handler");
 

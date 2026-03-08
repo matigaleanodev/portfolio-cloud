@@ -1,19 +1,22 @@
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import type { Readable } from "node:stream";
-import { handler as generateOgHandler } from "../generate-og/handler";
-import { handler as notifyPostHandler } from "../notify-post/handler";
 import { jsonResponse } from "../../shared/lambda";
 import { logInfo } from "../../shared/logger";
 import { requireEnv } from "../../shared/env";
+import { assertLambdaSuccess, invokeLambda } from "../../shared/invoke-lambda";
 import { s3 } from "../../shared/s3";
 import type {
+  GenerateOgEvent,
   LambdaResponse,
+  NotifyPostEvent,
   ProcessReleaseEvent,
   ReleaseManifest,
   ReleasePost,
 } from "../../shared/types";
 
 const bucket = requireEnv("R2_BUCKET");
+const generateOgFunctionName = requireEnv("GENERATE_OG_FUNCTION_NAME");
+const notifyPostFunctionName = requireEnv("NOTIFY_POST_FUNCTION_NAME");
 const processedPostsStateKey = "state/posts.json";
 
 type StringReadable =
@@ -152,17 +155,19 @@ export function detectNewPosts(
 export async function processPost(post: ReleasePost, siteUrl: string): Promise<void> {
   const postUrl = buildCanonicalUrl(siteUrl, post.canonicalPath);
 
-  await generateOgHandler({
+  const generateOgResponse = await invokeLambda<GenerateOgEvent>(generateOgFunctionName, {
     slug: post.slug,
     title: post.title,
     date: post.date,
   });
+  assertLambdaSuccess(generateOgFunctionName, generateOgResponse);
 
-  await notifyPostHandler({
+  const notifyPostResponse = await invokeLambda<NotifyPostEvent>(notifyPostFunctionName, {
     title: post.title,
     url: postUrl,
     date: post.date,
   });
+  assertLambdaSuccess(notifyPostFunctionName, notifyPostResponse);
 }
 
 export async function processRelease(
