@@ -54,6 +54,7 @@ lerna-debug.log*
 .tmp
 /.temp-generate-og-artifact
 /.temp-preview
+/og-preview.png
 
 # Runtime data
 pids

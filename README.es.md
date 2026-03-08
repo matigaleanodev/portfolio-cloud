@@ -183,6 +183,7 @@ src/
 - `npm run lint`: ESLint sobre el source y la config de Vitest
 - `npm test`: suite de tests unitarios con Vitest
 - `npm run ci`: atajo local de validacion para lint, tests y build TypeScript
+- `npm run dev:og:preview`: genera `og-preview.png` en la raiz del repositorio para iteracion visual local
 - `npm run sam:validate`: valida la plantilla AWS SAM
 - `npm run sam:build`: construye artifacts Lambda mediante AWS SAM y esbuild sobre el runner Linux de CI
 - `npm run sam:deploy:guided`: inicia un deploy guiado de SAM para preparar un ambiente local
@@ -221,4 +222,4 @@ Prerequisitos AWS para el flujo actual de deploy:
 
 ## Estado
 
-El repositorio ya contiene flujos de automatizacion del blog, persistencia de suscriptores sobre R2, orquestacion de releases y cobertura unitaria para handlers y helpers principales.
+El repositorio ya contiene flujos de automatizacion del blog, persistencia de suscriptores sobre R2, orquestacion de releases y cobertura unitaria para handlers, servicios y modulos compartidos que sostienen los contratos principales de runtime.
