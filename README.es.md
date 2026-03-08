@@ -184,7 +184,7 @@ src/
 - `npm test`: suite de tests unitarios con Vitest
 - `npm run ci`: atajo local de validacion para lint, tests y build TypeScript
 - `npm run sam:validate`: valida la plantilla AWS SAM
-- `npm run sam:build`: construye artifacts Lambda mediante AWS SAM, esbuild y un contenedor compatible con Lambda
+- `npm run sam:build`: construye artifacts Lambda mediante AWS SAM y esbuild sobre el runner Linux de CI
 - `npm run sam:deploy:guided`: inicia un deploy guiado de SAM para preparar un ambiente local
 
 ## Infraestructura
