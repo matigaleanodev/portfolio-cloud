@@ -1,0 +1,12 @@
+{
+  "name": "portfolio-cloud-sharp-layer",
+  "version": "0.0.1",
+  "private": true,
+  "dependencies": {
+    "sharp": "^0.34.5"
+  },
+  "optionalDependencies": {
+    "@img/sharp-libvips-linux-x64": "^1.2.4",
+    "@img/sharp-linux-x64": "^0.34.5"
+  }
+}
