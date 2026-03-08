@@ -1,5 +1,15 @@
-import sharp from "sharp";
 import type { OgGenerationInput } from "./types";
+
+const sharpModuleName = "sharp";
+
+type SharpModule = typeof import("sharp");
+
+async function loadSharp(): Promise<SharpModule> {
+  const sharpModule = await import(sharpModuleName);
+
+  return ((sharpModule as unknown as { default?: SharpModule }).default ??
+    sharpModule) as SharpModule;
+}
 
 const palette = {
   background: "#e5e7eb",
@@ -51,6 +61,7 @@ export async function generateOgImage({
   tags = [],
   date,
 }: Omit<OgGenerationInput, "slug">): Promise<Buffer> {
+  const sharp = await loadSharp();
   const width = 1200;
   const height = 630;
   const safeTitle = escapeXml(truncate(title, 96));
