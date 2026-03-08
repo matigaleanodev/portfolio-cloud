@@ -84,6 +84,8 @@ CI de `portfolio`
 
 Esto mantiene el trigger como una operacion privada del pipeline sin romper los limites actuales entre handler, orquestacion e integraciones.
 
+Dentro de AWS, `process-release` orquesta las Lambdas desplegadas `generate-og` y `notify-post` mediante la Lambda Invoke API, en lugar de importar sus handlers dentro del mismo bundle.
+
 La Lambda acepta estas dos formas de payload:
 
 - un payload envuelto con el campo `manifest`

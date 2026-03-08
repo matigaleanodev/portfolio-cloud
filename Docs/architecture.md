@@ -84,6 +84,8 @@ The real execution flow is:
 
 This keeps the trigger private to CI while preserving the current handler and orchestration boundaries inside `portfolio-cloud`.
 
+Inside AWS, `process-release` orchestrates the deployed `generate-og` and `notify-post` Lambdas through the Lambda Invoke API instead of importing their handlers into the same bundle.
+
 The Lambda accepts both of these payload shapes:
 
 - a wrapped invocation payload with a `manifest` field
