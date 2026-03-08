@@ -88,6 +88,8 @@ This keeps the trigger private to CI while preserving the current handler and or
 
 Inside AWS, `process-release` orchestrates the deployed `generate-og` and `notify-post` Lambdas through the Lambda Invoke API instead of importing their handlers into the same bundle.
 
+The release state stored in R2 is stage-aware per post. This allows `process-release` to persist partial progress, retry bounded downstream failures, and avoid rerunning `generate-og` or resending notifications when only a later stage failed.
+
 The Lambda accepts both of these payload shapes:
 
 - a wrapped invocation payload with a `manifest` field

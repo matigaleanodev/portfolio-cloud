@@ -88,6 +88,8 @@ Esto mantiene el trigger como una operacion privada del pipeline sin romper los 
 
 Dentro de AWS, `process-release` orquesta las Lambdas desplegadas `generate-og` y `notify-post` mediante la Lambda Invoke API, en lugar de importar sus handlers dentro del mismo bundle.
 
+El estado de release persistido en R2 ahora es consciente de la etapa por post. Eso permite a `process-release` guardar progreso parcial, reintentar fallos downstream de manera acotada y evitar rehacer `generate-og` o reenviar notificaciones cuando la falla estuvo en una etapa posterior.
+
 La Lambda acepta estas dos formas de payload:
 
 - un payload envuelto con el campo `manifest`

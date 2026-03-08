@@ -82,6 +82,8 @@ Expected responsibilities:
 - load the processed posts state from `state/posts.json`
 - detect new post slugs
 - invoke `generate-og` and `notify-post` for each new post
+- retry each downstream stage with a small bounded retry policy
+- persist partial stage progress to avoid regenerating OG or resending notifications unnecessarily
 - persist the updated processed state back to R2
 
 ## Persistence Model
@@ -89,7 +91,7 @@ Expected responsibilities:
 Current R2 objects used by the automations:
 
 - `subscribers/{email}.json`: one object per subscriber
-- `state/posts.json`: list of already processed post slugs
+- `state/posts.json`: stage-aware processing state per post slug
 - `artifacts/chat/knowledge.json`: canonical editorial chat knowledge envelope
 - `${OG_OBJECT_PREFIX}/{slug}.png`: generated OG images
 
@@ -105,10 +107,23 @@ Subscriber object format:
 Processed posts state format:
 
 ```json
-[
-  "arquitectura-modo-playa",
-  "arquitectura-angular-real"
-]
+{
+  "arquitectura-modo-playa": {
+    "ogGeneratedAt": "2026-03-08T12:00:00.000Z",
+    "notifiedAt": "2026-03-08T12:01:00.000Z",
+    "updatedAt": "2026-03-08T12:01:00.000Z"
+  },
+  "arquitectura-angular-real": {
+    "ogGeneratedAt": "2026-03-08T12:03:00.000Z",
+    "updatedAt": "2026-03-08T12:04:00.000Z",
+    "lastFailure": {
+      "stage": "notify-post",
+      "failedAt": "2026-03-08T12:04:00.000Z",
+      "attempts": 2,
+      "message": "Lambda portfolio-cloud-dev-notify-post returned 500: ..."
+    }
+  }
+}
 ```
 
 ## Release Processing
@@ -142,6 +157,8 @@ portfolio deploy
     -> notify-post
     -> update state/posts.json
 ```
+
+`process-release` now treats a post as fully processed only after `notify-post` succeeds. If `generate-og` succeeds but `notify-post` fails, the saved state preserves the OG stage and the next run retries only the notification step.
 
 ## Editorial Knowledge Publication
 
@@ -201,6 +218,7 @@ For R2, OG generation, and blog notifications, the project currently expects the
 - `OG_OBJECT_PREFIX`: object prefix inside the bucket, for example `og`
 - `CHAT_KNOWLEDGE_OBJECT_KEY`: object key for the canonical editorial chat knowledge, default `artifacts/chat/knowledge.json`
 - `MEDIA_BASE_URL`: public base URL used to build OG asset URLs
+- `RELEASE_STAGE_MAX_ATTEMPTS`: bounded retry count per downstream release stage, default `2`
 - `BLOG_FROM_EMAIL`: sender address used by Resend notifications
 - `RESEND_API_KEY`: Resend API key for email delivery
 
