@@ -134,19 +134,7 @@ Resources:
       Timeout: 30
       MemorySize: 1024
     Metadata:
-      BuildMethod: esbuild
-      BuildProperties:
-        UseNpmCi: true
-        EntryPoints:
-          - src/lambdas/generate-og/handler.ts
-        External:
-          - "@resvg/resvg-js"
-        Minify: true
-        Sourcemap: true
-        Target: es2022
-        Format: cjs
-        OutExtension:
-          - .js=.js
+      BuildMethod: makefile
 
   NotifyPostFunction:
     Type: AWS::Serverless::Function

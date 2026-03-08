@@ -115,8 +115,8 @@ Current deploy contract:
 - artifacts bucket: `portfolio-cloud-dev-artifacts`
 - artifacts prefix: `sam`
 - native dependencies are built on the Linux CI runner through `sam build`
-- `generate-og` resolves `@resvg/resvg-js` as a runtime dependency inside the function artifact
-- OG rendering stays inside the Lambda package and no longer depends on a dedicated native layer
-- the deploy workflow only needs the regular `npm ci` plus `sam build` path
+- `generate-og` uses a dedicated SAM makefile build instead of the default esbuild metadata path
+- the custom build bundles the handler and copies `@resvg/resvg-js` plus the Linux binding into the Lambda artifact
+- the deploy workflow must keep `npm ci --include=optional` before `sam build`
 
 Real deployment still requires environment-specific AWS and provider values that should not be hardcoded in versioned files.
