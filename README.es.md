@@ -82,6 +82,8 @@ Responsabilidades esperadas:
 - cargar el estado de posts procesados desde `state/posts.json`
 - detectar slugs nuevos
 - invocar `generate-og` y `notify-post` por cada post nuevo
+- reintentar cada etapa downstream con una politica acotada de reintentos
+- persistir progreso parcial por etapa para no regenerar OG ni reenviar notificaciones sin necesidad
 - persistir el estado actualizado en R2
 
 ## Modelo de persistencia
@@ -89,7 +91,7 @@ Responsabilidades esperadas:
 Objetos actuales usados en R2 por las automatizaciones:
 
 - `subscribers/{email}.json`: un objeto por suscriptor
-- `state/posts.json`: lista de slugs de posts ya procesados
+- `state/posts.json`: estado de procesamiento por etapas para cada slug
 - `artifacts/chat/knowledge.json`: envelope canonico del conocimiento editorial del chat
 - `${OG_OBJECT_PREFIX}/{slug}.png`: imagenes OG generadas
 
@@ -105,10 +107,23 @@ Formato del objeto de suscriptor:
 Formato del estado de posts procesados:
 
 ```json
-[
-  "arquitectura-modo-playa",
-  "arquitectura-angular-real"
-]
+{
+  "arquitectura-modo-playa": {
+    "ogGeneratedAt": "2026-03-08T12:00:00.000Z",
+    "notifiedAt": "2026-03-08T12:01:00.000Z",
+    "updatedAt": "2026-03-08T12:01:00.000Z"
+  },
+  "arquitectura-angular-real": {
+    "ogGeneratedAt": "2026-03-08T12:03:00.000Z",
+    "updatedAt": "2026-03-08T12:04:00.000Z",
+    "lastFailure": {
+      "stage": "notify-post",
+      "failedAt": "2026-03-08T12:04:00.000Z",
+      "attempts": 2,
+      "message": "Lambda portfolio-cloud-dev-notify-post returned 500: ..."
+    }
+  }
+}
 ```
 
 ## Procesamiento de release
@@ -142,6 +157,8 @@ deploy de portfolio
     -> notify-post
     -> actualizar state/posts.json
 ```
+
+`process-release` ahora considera un post como completamente procesado solo despues de que `notify-post` termine bien. Si `generate-og` sale bien pero `notify-post` falla, el estado guardado conserva la etapa OG y la siguiente corrida reintenta solo la notificacion.
 
 ## Publicacion del conocimiento editorial
 
@@ -201,6 +218,7 @@ Para R2, generacion de OG y notificaciones del blog, el proyecto espera actualme
 - `OG_OBJECT_PREFIX`: prefijo de objetos dentro del bucket, por ejemplo `og`
 - `CHAT_KNOWLEDGE_OBJECT_KEY`: key del objeto canonico del conocimiento editorial del chat, default `artifacts/chat/knowledge.json`
 - `MEDIA_BASE_URL`: base URL publica usada para construir URLs de assets OG
+- `RELEASE_STAGE_MAX_ATTEMPTS`: cantidad acotada de reintentos por etapa downstream del release, default `2`
 - `BLOG_FROM_EMAIL`: direccion remitente usada por Resend
 - `RESEND_API_KEY`: API key de Resend para entrega de emails
 
@@ -259,6 +277,19 @@ Baseline actual del stack:
 - artifacts de deploy almacenados en el bucket dedicado `portfolio-cloud-dev-artifacts`
 
 Las notas de arquitectura del repositorio viven en `Docs/architecture.md` y `Docs/architecture.es.md`.
+
+## Target de despliegue
+
+El workflow de deploy de GitHub ahora apunta a produccion por default cuando hay pushes a `main`.
+
+Comportamiento actual del despliegue:
+
+- `push` a `main` -> despliega `prod`
+- `workflow_dispatch` -> puede desplegar `dev` o `prod`
+- patron default de nombre de stack: `portfolio-cloud-<stage>`
+- patron default de bucket de artifacts: `portfolio-cloud-<stage>-artifacts`
+
+Despues de cada deploy, el workflow exporta los outputs del stack de CloudFormation como artifact para que `portfolio` y `portfolio-api` puedan apuntar a los valores productivos correctos.
 
 ## Inputs de despliegue
 

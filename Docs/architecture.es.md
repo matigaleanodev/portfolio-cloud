@@ -58,6 +58,12 @@ Naming actual de despliegue:
 - nombre previsto del stack de produccion: `portfolio-cloud-prod`
 - bucket de artifacts del ambiente activo: `portfolio-cloud-dev-artifacts`
 
+Target operativo de despliegue:
+
+- los pushes a `main` deben desplegar el stage `prod`
+- el workflow manual puede seguir apuntando a `dev` o `prod`
+- el workflow de deploy resuelve stack y bucket de artifacts por stage en lugar de dejar `dev` hardcodeado
+
 Esto mantiene los contratos de despliegue cerca de los handlers reales sin introducir un repositorio de infraestructura separado.
 
 ## Superficie publica de API
@@ -87,6 +93,8 @@ CI de `portfolio`
 Esto mantiene el trigger como una operacion privada del pipeline sin romper los limites actuales entre handler, orquestacion e integraciones.
 
 Dentro de AWS, `process-release` orquesta las Lambdas desplegadas `generate-og` y `notify-post` mediante la Lambda Invoke API, en lugar de importar sus handlers dentro del mismo bundle.
+
+El estado de release persistido en R2 ahora es consciente de la etapa por post. Eso permite a `process-release` guardar progreso parcial, reintentar fallos downstream de manera acotada y evitar rehacer `generate-og` o reenviar notificaciones cuando la falla estuvo en una etapa posterior.
 
 La Lambda acepta estas dos formas de payload:
 
