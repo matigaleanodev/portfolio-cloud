@@ -13,6 +13,55 @@ export type Subscriber = {
   createdAt: string;
 };
 
+export type EditorialKnowledgeLink = {
+  label: string;
+  url: string;
+  icon?: string;
+};
+
+export type EditorialProjectEntry = {
+  slug: string;
+  title: string;
+  excerpt: string;
+  stack?: string[];
+  links?: EditorialKnowledgeLink[];
+  highlights?: string[];
+  searchText?: string;
+};
+
+export type EditorialPostEntry = {
+  slug: string;
+  title: string;
+  excerpt: string;
+  date: string;
+  tags?: string[];
+  canonicalUrl?: string;
+  summary?: string;
+  searchText?: string;
+};
+
+export type EditorialKnowledgeArtifact = {
+  generatedAt: string;
+  projects?: EditorialProjectEntry[];
+  posts?: EditorialPostEntry[];
+};
+
+export type EditorialKnowledgeSource = {
+  repository: string;
+  artifactPath: string;
+};
+
+export type EditorialKnowledgeRelease = Pick<ReleaseManifest, "generatedAt" | "siteUrl">;
+
+export type PublishedEditorialKnowledgeArtifact = {
+  version: 1;
+  generatedAt: string;
+  source: EditorialKnowledgeSource;
+  release?: EditorialKnowledgeRelease;
+  contentHash: string;
+  knowledge: EditorialKnowledgeArtifact;
+};
+
 export type OgGenerationInput = {
   slug: string;
   title: string;
@@ -53,3 +102,13 @@ export type ProcessReleaseEvent = {
 };
 
 export type ProcessReleaseInvocation = ProcessReleaseEvent | ReleaseManifest;
+
+export type PublishChatKnowledgeEvent = {
+  artifact?: EditorialKnowledgeArtifact;
+  release?: EditorialKnowledgeRelease;
+  source?: Partial<EditorialKnowledgeSource>;
+};
+
+export type PublishChatKnowledgeInvocation =
+  | PublishChatKnowledgeEvent
+  | EditorialKnowledgeArtifact;

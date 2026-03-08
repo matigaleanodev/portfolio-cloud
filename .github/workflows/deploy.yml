@@ -8,12 +8,16 @@ on:
     inputs:
       stage:
         description: Deployment stage name
-        required: true
-        default: dev
+        required: false
+        default: prod
       stack_name:
         description: CloudFormation stack name
-        required: true
-        default: portfolio-cloud-dev
+        required: false
+        default: ""
+      artifacts_bucket:
+        description: S3 bucket used by SAM deploy artifacts
+        required: false
+        default: ""
 
 jobs:
   deploy:
@@ -31,17 +35,41 @@ jobs:
       R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
       R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
       OG_OBJECT_PREFIX: og
+      CHAT_KNOWLEDGE_OBJECT_KEY: ${{ vars.PORTFOLIO_CLOUD_CHAT_KNOWLEDGE_OBJECT_KEY || 'artifacts/chat/knowledge.json' }}
+      RELEASE_STAGE_MAX_ATTEMPTS: ${{ vars.PORTFOLIO_CLOUD_RELEASE_STAGE_MAX_ATTEMPTS || '2' }}
       MEDIA_BASE_URL: https://media.matiasgaleano.dev
       BLOG_FROM_EMAIL: blog@matiasgaleano.dev
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-      DEPLOY_STAGE: ${{ github.event.inputs.stage || 'dev' }}
-      STACK_NAME: ${{ github.event.inputs.stack_name || 'portfolio-cloud-dev' }}
-      ARTIFACTS_BUCKET: portfolio-cloud-dev-artifacts
       ARTIFACTS_PREFIX: sam
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Resolve deployment target
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          stage="${{ github.event.inputs.stage }}"
+          stack_name="${{ github.event.inputs.stack_name }}"
+          artifacts_bucket="${{ github.event.inputs.artifacts_bucket }}"
+
+          if [ -z "$stage" ]; then
+            stage="prod"
+          fi
+
+          if [ -z "$stack_name" ]; then
+            stack_name="portfolio-cloud-${stage}"
+          fi
+
+          if [ -z "$artifacts_bucket" ]; then
+            artifacts_bucket="portfolio-cloud-${stage}-artifacts"
+          fi
+
+          echo "DEPLOY_STAGE=$stage" >> "$GITHUB_ENV"
+          echo "STACK_NAME=$stack_name" >> "$GITHUB_ENV"
+          echo "ARTIFACTS_BUCKET=$artifacts_bucket" >> "$GITHUB_ENV"
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -87,6 +115,29 @@ jobs:
           "R2AccessKeyId=${R2_ACCESS_KEY_ID}"
           "R2SecretAccessKey=${R2_SECRET_ACCESS_KEY}"
           "OgObjectPrefix=${OG_OBJECT_PREFIX}"
+          "ChatKnowledgeObjectKey=${CHAT_KNOWLEDGE_OBJECT_KEY}"
+          "ReleaseStageMaxAttempts=${RELEASE_STAGE_MAX_ATTEMPTS}"
           "MediaBaseUrl=${MEDIA_BASE_URL}"
           "BlogFromEmail=${BLOG_FROM_EMAIL}"
           "ResendApiKey=${RESEND_API_KEY}"
+
+      - name: Export stack outputs
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .generated
+
+          aws cloudformation describe-stacks \
+            --stack-name "${STACK_NAME}" \
+            --region "${AWS_REGION}" \
+            --query "Stacks[0].Outputs" \
+            --output json \
+            > .generated/stack-outputs.json
+
+          cat .generated/stack-outputs.json
+
+      - name: Upload stack outputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: portfolio-cloud-stack-outputs-${{ github.sha }}
+          path: .generated/stack-outputs.json

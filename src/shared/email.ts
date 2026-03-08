@@ -9,6 +9,8 @@ type BlogNotificationInput = NotifyPostInput & {
   to: string;
 };
 
+const unsubscribeBaseUrl = "https://matiasgaleano.dev/blog/unsubscribe";
+
 function escapeHtml(value: string): string {
   return value
     .replaceAll("&", "&amp;")
@@ -36,6 +38,10 @@ function formatDateLabel(date?: string): string | null {
   }).format(parsedDate);
 }
 
+function buildUnsubscribeUrl(email: string): string {
+  return `${unsubscribeBaseUrl}?email=${encodeURIComponent(email)}`;
+}
+
 export async function sendBlogNotification(
   input: BlogNotificationInput,
 ): Promise<unknown> {
@@ -44,6 +50,8 @@ export async function sendBlogNotification(
   const safeUrl = escapeHtml(input.url);
   const safeExcerpt = input.excerpt ? escapeHtml(input.excerpt) : null;
   const formattedDate = formatDateLabel(input.date);
+  const unsubscribeUrl = buildUnsubscribeUrl(input.to);
+  const safeUnsubscribeUrl = escapeHtml(unsubscribeUrl);
   const tags = (input.tags ?? []).slice(0, 4).map((tag) => escapeHtml(tag));
   const tagMarkup = tags
     .map(
@@ -64,6 +72,7 @@ export async function sendBlogNotification(
       input.title,
       safeExcerpt ? input.excerpt ?? "" : "",
       input.url,
+      `Cancelar suscripcion: ${unsubscribeUrl}`,
     ]
       .filter(Boolean)
       .join("\n\n"),
@@ -99,7 +108,11 @@ export async function sendBlogNotification(
 
           <div style="padding:0 6px;font-size:13px;line-height:1.65;color:#4b5563;">
             <p style="margin:0 0 8px;">Recibiste este mail porque te suscribiste al blog de Matias Galeano.</p>
-            <p style="margin:0;">Blog de arquitectura, backend, cloud y productos reales.</p>
+            <p style="margin:0 0 8px;">Blog de arquitectura, backend, cloud y productos reales.</p>
+            <p style="margin:0;">
+              Si ya no queres recibir estos mails, podes darte de baja en
+              <a href="${safeUnsubscribeUrl}" style="color:#1f2937;font-weight:600;">esta pagina</a>.
+            </p>
           </div>
         </div>
       </div>

@@ -189,7 +189,23 @@ describe("process-release handler", () => {
       Key: "state/posts.json",
       ContentType: "application/json",
     });
-    expect(JSON.parse(String(putCommand.input.Body))).toEqual(["a", "b", "c"]);
+    expect(JSON.parse(String(putCommand.input.Body))).toMatchObject({
+      a: {
+        ogGeneratedAt: "1970-01-01T00:00:00.000Z",
+        notifiedAt: "1970-01-01T00:00:00.000Z",
+        updatedAt: "1970-01-01T00:00:00.000Z",
+      },
+      b: {
+        ogGeneratedAt: "1970-01-01T00:00:00.000Z",
+        notifiedAt: "1970-01-01T00:00:00.000Z",
+        updatedAt: "1970-01-01T00:00:00.000Z",
+      },
+      c: {
+        ogGeneratedAt: expect.any(String),
+        notifiedAt: expect.any(String),
+        updatedAt: expect.any(String),
+      },
+    });
   });
 
   it("assumes an empty state when state/posts.json does not exist", async () => {
