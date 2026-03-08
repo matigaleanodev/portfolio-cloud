@@ -15,6 +15,7 @@ Su alcance incluye:
 - procesamiento de release manifests
 - generacion de imagenes Open Graph
 - notificaciones de publicacion
+- publicacion del conocimiento editorial del chat
 - persistencia de suscripciones del blog
 - orquestacion post-deploy
 
@@ -45,6 +46,7 @@ El stack inicial define:
 
 - una Lambda por cada entrypoint de automatizacion actual
 - una API HTTP compartida para `subscribe` y `unsubscribe`
+- una Lambda interna para publicar en R2 el artifact editorial del chat
 - variables de entorno de runtime centralizadas mediante parametros del stack
 - empaquetado con `esbuild` conducido por metadata de SAM
 
@@ -101,6 +103,20 @@ aws lambda invoke \
   --payload file://.generated/release-manifest.json \
   response.json
 ```
+
+## Handoff del artifact editorial
+
+El conocimiento editorial del chat generado por `portfolio` se entrega como `.generated/chat/knowledge.json`.
+
+`portfolio-cloud` pasa a ser el owner de la copia cloud canonica de ese artifact en R2 mediante la Lambda interna `publish-chat-knowledge`.
+
+Key canonica actual del objeto:
+
+- `artifacts/chat/knowledge.json`
+
+El payload fuente sigue siendo el artifact editorial generado por `portfolio`, mientras que el objeto almacenado en cloud lo envuelve con metadata operativa como version de publicacion, origen, metadata de release cuando existe y hash de contenido.
+
+Esto mantiene aislado a `process-release` del handoff del conocimiento del chat para no cargar riesgo no relacionado sobre una Lambda de release ya validada.
 
 ## Validacion de despliegue
 

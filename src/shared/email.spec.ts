@@ -52,12 +52,18 @@ describe("shared/email", () => {
 
     expect(payload.text).toContain("Arquitectura <Modo Playa>");
     expect(payload.text).toContain("Backend & cloud con <tags>");
+    expect(payload.text).toContain(
+      "Cancelar suscripcion: https://matiasgaleano.dev/blog/unsubscribe?email=contacto%40matiasgaleano.dev",
+    );
     expect(payload.html).toContain("Arquitectura &lt;Modo Playa&gt;");
     expect(payload.html).toContain("Backend &amp; cloud con &lt;tags&gt;");
     expect(payload.html).toContain("mar");
     expect(payload.html).toContain("2026");
     expect(payload.html).toContain("aws");
     expect(payload.html).toContain("serverless");
+    expect(payload.html).toContain(
+      "https://matiasgaleano.dev/blog/unsubscribe?email=contacto%40matiasgaleano.dev",
+    );
     expect(payload.html).not.toContain("extra");
   });
 
@@ -79,6 +85,8 @@ describe("shared/email", () => {
 
     expect(payload.text).toContain("Nuevo post");
     expect(payload.text).toContain("https://matiasgaleano.dev/blog/nuevo-post");
+    expect(payload.text).toContain("Cancelar suscripcion:");
     expect(payload.html).toContain("matiasgaleano.dev/blog");
+    expect(payload.html).toContain("esta pagina");
   });
 });

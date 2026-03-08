@@ -28,6 +28,9 @@ Parameters:
   OgObjectPrefix:
     Type: String
     Default: og
+  ChatKnowledgeObjectKey:
+    Type: String
+    Default: artifacts/chat/knowledge.json
   MediaBaseUrl:
     Type: String
     Default: https://media.matiasgaleano.dev
@@ -54,6 +57,7 @@ Globals:
         R2_ACCESS_KEY_ID: !Ref R2AccessKeyId
         R2_SECRET_ACCESS_KEY: !Ref R2SecretAccessKey
         OG_OBJECT_PREFIX: !Ref OgObjectPrefix
+        CHAT_KNOWLEDGE_OBJECT_KEY: !Ref ChatKnowledgeObjectKey
         MEDIA_BASE_URL: !Ref MediaBaseUrl
         BLOG_FROM_EMAIL: !Ref BlogFromEmail
         RESEND_API_KEY: !Ref ResendApiKey
@@ -188,6 +192,25 @@ Resources:
         OutExtension:
           - .js=.js
 
+  PublishChatKnowledgeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub portfolio-cloud-${StageName}-publish-chat-knowledge
+      CodeUri: .
+      Handler: src/lambdas/publish-chat-knowledge/handler.handler
+      Description: Publishes the editorial chat knowledge artifact to Cloudflare R2.
+    Metadata:
+      BuildMethod: esbuild
+      BuildProperties:
+        EntryPoints:
+          - src/lambdas/publish-chat-knowledge/handler.ts
+        Minify: true
+        Sourcemap: true
+        Target: es2022
+        Format: cjs
+        OutExtension:
+          - .js=.js
+
 Outputs:
   HttpApiUrl:
     Description: Base URL for the public subscription API.
@@ -207,3 +230,6 @@ Outputs:
   ProcessReleaseFunctionName:
     Description: Deployed Lambda function name for release processing.
     Value: !Ref ProcessReleaseFunction
+  PublishChatKnowledgeFunctionName:
+    Description: Deployed Lambda function name for chat knowledge publication.
+    Value: !Ref PublishChatKnowledgeFunction

@@ -12,6 +12,7 @@ El proyecto incluye actualmente estas Lambdas:
 
 - `generate-og`: genera assets Open Graph para contenido del portfolio o del blog.
 - `notify-post`: envia notificaciones cuando se publica un nuevo post.
+- `publish-chat-knowledge`: publica en Cloudflare R2 el artifact editorial del chat.
 - `subscribe`: guarda suscripciones del blog en Cloudflare R2.
 - `unsubscribe`: elimina suscripciones del blog en Cloudflare R2.
 - `process-release`: entrypoint de orquestacion post-deploy para procesar release manifests.
@@ -39,6 +40,17 @@ Responsabilidades esperadas:
 - transformar metadata del post en la plantilla de notificacion del blog
 - disparar envios por Resend para cada suscriptor
 - mantenerse segura para ejecuciones repetidas
+
+### `publish-chat-knowledge`
+
+Responsable de publicar la copia cloud canonica del conocimiento editorial del chat generado por `portfolio`.
+
+Responsabilidades esperadas:
+
+- aceptar el artifact editorial generado desde `.generated/chat/knowledge.json`
+- validar la forma del payload ya consumido por `portfolio-api`
+- envolverlo con metadata operativa de publicacion cloud
+- subir el objeto canonico a Cloudflare R2
 
 ### `subscribe`
 
@@ -78,6 +90,7 @@ Objetos actuales usados en R2 por las automatizaciones:
 
 - `subscribers/{email}.json`: un objeto por suscriptor
 - `state/posts.json`: lista de slugs de posts ya procesados
+- `artifacts/chat/knowledge.json`: envelope canonico del conocimiento editorial del chat
 - `${OG_OBJECT_PREFIX}/{slug}.png`: imagenes OG generadas
 
 Formato del objeto de suscriptor:
@@ -130,6 +143,44 @@ deploy de portfolio
     -> actualizar state/posts.json
 ```
 
+## Publicacion del conocimiento editorial
+
+`publish-chat-knowledge` acepta:
+
+- el artifact editorial crudo generado por `portfolio`
+- o un payload envuelto con `artifact`, `release` opcional y `source` opcional
+
+El artifact fuente generado por `portfolio` hoy tiene esta forma:
+
+```json
+{
+  "generatedAt": "2026-03-08T12:29:28.947Z",
+  "projects": [],
+  "posts": []
+}
+```
+
+El objeto cloud canonico publicado por `portfolio-cloud` envuelve ese payload asi:
+
+```json
+{
+  "version": 1,
+  "generatedAt": "2026-03-08T12:29:28.947Z",
+  "source": {
+    "repository": "portfolio",
+    "artifactPath": ".generated/chat/knowledge.json"
+  },
+  "contentHash": "sha256:...",
+  "knowledge": {
+    "generatedAt": "2026-03-08T12:29:28.947Z",
+    "projects": [],
+    "posts": []
+  }
+}
+```
+
+Esto mantiene a `portfolio` como fuente de verdad editorial y a `portfolio-cloud` como owner del handoff canonico en R2.
+
 ## Notas de desarrollo
 
 - El proyecto usa TypeScript y compila a `dist/`.
@@ -148,6 +199,7 @@ Para R2, generacion de OG y notificaciones del blog, el proyecto espera actualme
 - `R2_ACCESS_KEY_ID`: access key id del API S3 de R2
 - `R2_SECRET_ACCESS_KEY`: secret access key del API S3 de R2
 - `OG_OBJECT_PREFIX`: prefijo de objetos dentro del bucket, por ejemplo `og`
+- `CHAT_KNOWLEDGE_OBJECT_KEY`: key del objeto canonico del conocimiento editorial del chat, default `artifacts/chat/knowledge.json`
 - `MEDIA_BASE_URL`: base URL publica usada para construir URLs de assets OG
 - `BLOG_FROM_EMAIL`: direccion remitente usada por Resend
 - `RESEND_API_KEY`: API key de Resend para entrega de emails
@@ -163,6 +215,8 @@ src/
       handler.ts
     notify-post/
       handler.ts
+    publish-chat-knowledge/
+      handler.ts
     process-release/
       handler.ts
     subscribe/
@@ -170,6 +224,7 @@ src/
     unsubscribe/
       handler.ts
   shared/
+    editorial-knowledge.ts
     email.ts
     lambda.ts
     og.ts
@@ -200,6 +255,7 @@ Baseline actual del stack:
 - una API HTTP compartida para `POST /subscriptions` y `DELETE /subscriptions`
 - variables de entorno compartidas pasadas mediante parametros del stack
 - `process-release` desplegada como Lambda interna invocada desde CI sin endpoint publico
+- `publish-chat-knowledge` desplegada como Lambda interna para el handoff del artifact editorial hacia R2
 - artifacts de deploy almacenados en el bucket dedicado `portfolio-cloud-dev-artifacts`
 
 Las notas de arquitectura del repositorio viven en `Docs/architecture.md` y `Docs/architecture.es.md`.
