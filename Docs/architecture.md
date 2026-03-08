@@ -58,6 +58,12 @@ Current deployment naming:
 - planned production stack name: `portfolio-cloud-prod`
 - deploy artifacts bucket for the active environment: `portfolio-cloud-dev-artifacts`
 
+Operational deploy targeting:
+
+- pushes to `main` are expected to deploy the `prod` stage
+- manual workflow dispatch can still target `dev` or `prod`
+- the deploy workflow resolves the default stack and artifacts bucket from the selected stage instead of hardcoding `dev`
+
 This keeps deployment contracts close to the real handlers without introducing a separate infrastructure repository.
 
 ## Public API surface

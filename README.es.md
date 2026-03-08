@@ -278,6 +278,19 @@ Baseline actual del stack:
 
 Las notas de arquitectura del repositorio viven en `Docs/architecture.md` y `Docs/architecture.es.md`.
 
+## Target de despliegue
+
+El workflow de deploy de GitHub ahora apunta a produccion por default cuando hay pushes a `main`.
+
+Comportamiento actual del despliegue:
+
+- `push` a `main` -> despliega `prod`
+- `workflow_dispatch` -> puede desplegar `dev` o `prod`
+- patron default de nombre de stack: `portfolio-cloud-<stage>`
+- patron default de bucket de artifacts: `portfolio-cloud-<stage>-artifacts`
+
+Despues de cada deploy, el workflow exporta los outputs del stack de CloudFormation como artifact para que `portfolio` y `portfolio-api` puedan apuntar a los valores productivos correctos.
+
 ## Inputs de despliegue
 
 El despliegue real sigue requiriendo valores especificos por ambiente.

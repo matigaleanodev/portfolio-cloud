@@ -58,6 +58,12 @@ Naming actual de despliegue:
 - nombre previsto del stack de produccion: `portfolio-cloud-prod`
 - bucket de artifacts del ambiente activo: `portfolio-cloud-dev-artifacts`
 
+Target operativo de despliegue:
+
+- los pushes a `main` deben desplegar el stage `prod`
+- el workflow manual puede seguir apuntando a `dev` o `prod`
+- el workflow de deploy resuelve stack y bucket de artifacts por stage en lugar de dejar `dev` hardcodeado
+
 Esto mantiene los contratos de despliegue cerca de los handlers reales sin introducir un repositorio de infraestructura separado.
 
 ## Superficie publica de API

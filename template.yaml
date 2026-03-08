@@ -31,6 +31,10 @@ Parameters:
   ChatKnowledgeObjectKey:
     Type: String
     Default: artifacts/chat/knowledge.json
+  ReleaseStageMaxAttempts:
+    Type: Number
+    Default: 2
+    MinValue: 1
   MediaBaseUrl:
     Type: String
     Default: https://media.matiasgaleano.dev
@@ -58,6 +62,7 @@ Globals:
         R2_SECRET_ACCESS_KEY: !Ref R2SecretAccessKey
         OG_OBJECT_PREFIX: !Ref OgObjectPrefix
         CHAT_KNOWLEDGE_OBJECT_KEY: !Ref ChatKnowledgeObjectKey
+        RELEASE_STAGE_MAX_ATTEMPTS: !Ref ReleaseStageMaxAttempts
         MEDIA_BASE_URL: !Ref MediaBaseUrl
         BLOG_FROM_EMAIL: !Ref BlogFromEmail
         RESEND_API_KEY: !Ref ResendApiKey

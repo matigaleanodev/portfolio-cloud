@@ -278,6 +278,19 @@ Current stack baseline:
 
 The repository-level architecture notes live in `Docs/architecture.md` and `Docs/architecture.es.md`.
 
+## Deployment targeting
+
+The GitHub deploy workflow now targets production by default on pushes to `main`.
+
+Current deployment behavior:
+
+- `push` to `main` -> deploys `prod`
+- `workflow_dispatch` -> can deploy `dev` or `prod`
+- default stack naming pattern: `portfolio-cloud-<stage>`
+- default artifacts bucket naming pattern: `portfolio-cloud-<stage>-artifacts`
+
+After a deploy, the workflow exports the CloudFormation stack outputs as an artifact so `portfolio` and `portfolio-api` can be pointed at the correct live production values.
+
 ## Deployment Inputs
 
 Real deployment still requires environment-specific values.
