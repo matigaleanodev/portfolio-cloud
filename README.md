@@ -184,7 +184,7 @@ src/
 - `npm test`: unit test suite with Vitest
 - `npm run ci`: local validation shortcut for lint, tests, and TypeScript build
 - `npm run sam:validate`: validates the AWS SAM template
-- `npm run sam:build`: builds Lambda artifacts through AWS SAM and esbuild
+- `npm run sam:build`: builds Lambda artifacts through AWS SAM, esbuild, and a Lambda-compatible container
 - `npm run sam:deploy:guided`: starts a guided SAM deploy for local environment setup
 
 ## Infrastructure

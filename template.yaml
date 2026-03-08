@@ -136,8 +136,11 @@ Resources:
     Metadata:
       BuildMethod: esbuild
       BuildProperties:
+        UseNpmCi: true
         EntryPoints:
           - src/lambdas/generate-og/handler.ts
+        External:
+          - sharp
         Minify: true
         Sourcemap: true
         Target: es2022
