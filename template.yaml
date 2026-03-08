@@ -141,6 +141,8 @@ Resources:
           - src/lambdas/generate-og/handler.ts
         External:
           - "@resvg/resvg-js"
+          - "@resvg/resvg-js/*"
+          - "@resvg/*"
         Minify: true
         Sourcemap: true
         Target: es2022
