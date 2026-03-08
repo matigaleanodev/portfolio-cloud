@@ -183,6 +183,7 @@ src/
 - `npm run lint`: ESLint over source and Vitest config
 - `npm test`: unit test suite with Vitest
 - `npm run ci`: local validation shortcut for lint, tests, and TypeScript build
+- `npm run dev:og:preview`: renders `og-preview.png` in the repository root for local visual iteration
 - `npm run sam:validate`: validates the AWS SAM template
 - `npm run sam:build`: builds Lambda artifacts through AWS SAM and esbuild on the Linux CI runner
 - `npm run sam:deploy:guided`: starts a guided SAM deploy for local environment setup
@@ -221,4 +222,4 @@ AWS prerequisites for the current deploy flow:
 
 ## Status
 
-The repository already contains blog automation flows, R2-backed subscriber persistence, release processing orchestration, and unit test coverage for the main handlers and shared helpers.
+The repository already contains blog automation flows, R2-backed subscriber persistence, release processing orchestration, and unit test coverage for handlers, services, and the shared modules that carry the main runtime contracts.

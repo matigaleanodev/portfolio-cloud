@@ -67,7 +67,7 @@ Initial routes:
 - `POST /subscriptions`
 - `DELETE /subscriptions`
 
-These routes are intended to be consumed by `portfolio`.
+These routes are intended to be consumed either directly by `portfolio` or through a thin facade in `portfolio-api`, while `portfolio-cloud` remains the owner of subscriber persistence and editorial automation.
 
 ## Release trigger
 
@@ -108,6 +108,12 @@ The repository currently supports two validation layers before a real deploy:
 
 - application checks with `npm run ci`
 - infrastructure checks with `npm run sam:validate` and `npm run sam:build`
+
+For visual iteration of the OG asset without a deploy, the repository also supports:
+
+- `npm run dev:og:preview`
+
+This writes `og-preview.png` in the repository root using the same renderer contract that is deployed in AWS.
 
 The GitHub deploy workflow uses a dedicated artifacts bucket instead of `--resolve-s3`.
 
