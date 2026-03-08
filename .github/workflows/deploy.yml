@@ -36,6 +36,8 @@ jobs:
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       DEPLOY_STAGE: ${{ github.event.inputs.stage || 'dev' }}
       STACK_NAME: ${{ github.event.inputs.stack_name || 'portfolio-cloud-dev' }}
+      ARTIFACTS_BUCKET: portfolio-cloud-dev-artifacts
+      ARTIFACTS_PREFIX: sam
 
     steps:
       - name: Checkout
@@ -71,7 +73,8 @@ jobs:
           --template-file .aws-sam/build/template.yaml
           --stack-name "${STACK_NAME}"
           --region "${AWS_REGION}"
-          --resolve-s3
+          --s3-bucket "${ARTIFACTS_BUCKET}"
+          --s3-prefix "${ARTIFACTS_PREFIX}"
           --capabilities CAPABILITY_IAM
           --no-confirm-changeset
           --no-fail-on-empty-changeset

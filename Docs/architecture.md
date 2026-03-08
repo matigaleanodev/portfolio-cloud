@@ -54,6 +54,7 @@ Current deployment naming:
 - Lambda naming pattern: `portfolio-cloud-<environment>-<service>`
 - current environment: `dev`
 - planned production stack name: `portfolio-cloud-prod`
+- deploy artifacts bucket for the active environment: `portfolio-cloud-dev-artifacts`
 
 This keeps deployment contracts close to the real handlers without introducing a separate infrastructure repository.
 
@@ -105,5 +106,13 @@ The repository currently supports two validation layers before a real deploy:
 
 - application checks with `npm run ci`
 - infrastructure checks with `npm run sam:validate` and `npm run sam:build`
+
+The GitHub deploy workflow uses a dedicated artifacts bucket instead of `--resolve-s3`.
+
+Current deploy contract:
+
+- stack name: `portfolio-cloud-dev`
+- artifacts bucket: `portfolio-cloud-dev-artifacts`
+- artifacts prefix: `sam`
 
 Real deployment still requires environment-specific AWS and provider values that should not be hardcoded in versioned files.

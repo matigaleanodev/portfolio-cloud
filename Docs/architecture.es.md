@@ -54,6 +54,7 @@ Naming actual de despliegue:
 - patron de nombres de Lambda: `portfolio-cloud-<environment>-<service>`
 - ambiente actual: `dev`
 - nombre previsto del stack de produccion: `portfolio-cloud-prod`
+- bucket de artifacts del ambiente activo: `portfolio-cloud-dev-artifacts`
 
 Esto mantiene los contratos de despliegue cerca de los handlers reales sin introducir un repositorio de infraestructura separado.
 
@@ -105,5 +106,13 @@ El repositorio soporta actualmente dos capas de validacion antes de un deploy re
 
 - checks de aplicacion con `npm run ci`
 - checks de infraestructura con `npm run sam:validate` y `npm run sam:build`
+
+El workflow de deploy de GitHub usa un bucket dedicado de artifacts en lugar de `--resolve-s3`.
+
+Contrato actual de deploy:
+
+- nombre del stack: `portfolio-cloud-dev`
+- bucket de artifacts: `portfolio-cloud-dev-artifacts`
+- prefijo de artifacts: `sam`
 
 El despliegue real sigue requiriendo valores de AWS y de proveedores por ambiente, que no deben quedar hardcodeados en archivos versionados.
