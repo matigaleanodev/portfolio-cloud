@@ -1,5 +1,6 @@
 import { uploadObject } from "../../shared/s3";
 import { logInfo } from "../../shared/logger";
+import { buildOgObjectKey, buildOgPublicUrl } from "../../shared/media";
 import { generateOgImage } from "../../shared/og";
 import { jsonResponse } from "../../shared/lambda";
 import type { GenerateOgEvent, LambdaResponse, OgGenerationInput } from "../../shared/types";
@@ -47,11 +48,11 @@ export async function generateOg(event: GenerateOgEvent): Promise<LambdaResponse
   };
 
   const image = await generateOgImage(ogImageInput);
-  const key = `${process.env.OG_OBJECT_PREFIX}/${input.slug}.png`;
+  const key = buildOgObjectKey(input.slug);
 
   await uploadObject(key, image, "image/png");
 
-  const url = `${process.env.MEDIA_BASE_URL}/${key}`;
+  const url = buildOgPublicUrl(input.slug);
 
   logInfo("OG image uploaded", { slug: input.slug, url });
 
