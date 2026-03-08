@@ -114,5 +114,7 @@ Contrato actual de deploy:
 - nombre del stack: `portfolio-cloud-dev`
 - bucket de artifacts: `portfolio-cloud-dev-artifacts`
 - prefijo de artifacts: `sam`
+- las dependencias nativas se construyen con `sam build --use-container`
+- `sharp` queda externo al bundle de esbuild para el runtime de la Lambda OG
 
 El despliegue real sigue requiriendo valores de AWS y de proveedores por ambiente, que no deben quedar hardcodeados en archivos versionados.
