@@ -2,6 +2,8 @@
 /dist
 /node_modules
 /build
+/layers/**/node_modules
+/layers/**/package-lock.json
 
 # Serverless artifacts
 /.serverless
