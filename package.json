@@ -4,6 +4,7 @@
   "description": "Serverless cloud automation for portfolio and blog (AWS Lambda)",
   "scripts": {
     "dev:og": "ts-node src/dev/run-og.ts",
+    "dev:og:preview": "ts-node src/dev/render-og.ts",
     "dev:notify": "ts-node src/dev/run-notify.ts",
     "dev:subscribe": "ts-node src/dev/run-subscribe.ts",
     "dev:unsubscribe": "ts-node src/dev/run-unsubscribe.ts",

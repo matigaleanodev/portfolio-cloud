@@ -210,7 +210,7 @@ export async function generateOgImage({
 
     ${tagsMarkup}
 
-    <g transform="translate(864 212)">
+    <g transform="translate(842 212)">
       <text x="122" y="0" text-anchor="middle" font-size="14" letter-spacing="3" font-weight="500" fill="rgba(229,231,235,0.52)" font-family="IBM Plex Mono">matiasgaleano.dev/blog</text>
       <text x="122" y="72" text-anchor="middle" font-size="30" font-weight="600" fill="${theme.background}" font-family="IBM Plex Sans">portfolio cloud</text>
       <text x="122" y="110" text-anchor="middle" font-size="30" font-weight="600" fill="${theme.background}" font-family="IBM Plex Sans">og automation</text>
