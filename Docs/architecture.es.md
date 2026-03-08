@@ -118,7 +118,7 @@ Contrato actual de deploy:
 - prefijo de artifacts: `sam`
 - las dependencias nativas se construyen en el runner Linux de CI mediante `sam build`
 - `generate-og` usa un build dedicado de SAM makefile en lugar del camino default por metadata de esbuild
-- el build custom bundela el handler y copia `@resvg/resvg-js` mas el binding Linux dentro del artifact de la Lambda
+- el build custom bundela el handler y copia los paquetes runtime de `@resvg` junto con las fuentes locales IBM Plex dentro del artifact de la Lambda
 - el workflow de deploy debe mantener `npm ci --include=optional` antes de `sam build`
 
 El despliegue real sigue requiriendo valores de AWS y de proveedores por ambiente, que no deben quedar hardcodeados en archivos versionados.

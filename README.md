@@ -187,7 +187,7 @@ src/
 - `npm run sam:build`: builds Lambda artifacts through AWS SAM and esbuild on the Linux CI runner
 - `npm run sam:deploy:guided`: starts a guided SAM deploy for local environment setup
 
-The deploy workflow builds OG rendering with `@resvg/resvg-js` directly inside the `generate-og` Lambda artifact, without an extra native layer. `generate-og` uses a dedicated SAM makefile build that copies the Linux `resvg` package into the deployment artifact.
+The deploy workflow builds OG rendering with `@resvg/resvg-js` directly inside the `generate-og` Lambda artifact, without an extra native layer. `generate-og` uses a dedicated SAM makefile build that copies the `@resvg` runtime packages and the local IBM Plex font assets into the deployment artifact so the image stays visually aligned with `portfolio`.
 
 ## Infrastructure
 
