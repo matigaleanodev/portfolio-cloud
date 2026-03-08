@@ -1,6 +1,9 @@
 name: deploy
 
 on:
+  push:
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       stage:
@@ -31,6 +34,8 @@ jobs:
       MEDIA_BASE_URL: https://media.matiasgaleano.dev
       BLOG_FROM_EMAIL: blog@matiasgaleano.dev
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+      DEPLOY_STAGE: ${{ github.event.inputs.stage || 'dev' }}
+      STACK_NAME: ${{ github.event.inputs.stack_name || 'portfolio-cloud-dev' }}
 
     steps:
       - name: Checkout
@@ -64,14 +69,14 @@ jobs:
         run: >
           sam deploy
           --template-file .aws-sam/build/template.yaml
-          --stack-name "${{ github.event.inputs.stack_name }}"
+          --stack-name "${STACK_NAME}"
           --region "${AWS_REGION}"
           --resolve-s3
           --capabilities CAPABILITY_IAM
           --no-confirm-changeset
           --no-fail-on-empty-changeset
           --parameter-overrides
-          "StageName=${{ github.event.inputs.stage }}"
+          "StageName=${DEPLOY_STAGE}"
           "AllowedOrigin=${ALLOWED_ORIGIN}"
           "R2Endpoint=${R2_ENDPOINT}"
           "R2Region=${R2_REGION}"
