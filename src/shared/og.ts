@@ -1,5 +1,12 @@
-import { Resvg } from "@resvg/resvg-js";
+import { createRequire } from "node:module";
 import type { OgGenerationInput } from "./types";
+
+type ResvgModule = typeof import("@resvg/resvg-js");
+const requireFromOgModule = createRequire(__filename);
+
+function loadResvg(): ResvgModule {
+  return requireFromOgModule("@resvg/resvg-js") as ResvgModule;
+}
 
 const palette = {
   background: "#e5e7eb",
@@ -51,6 +58,7 @@ export async function generateOgImage({
   tags = [],
   date,
 }: Omit<OgGenerationInput, "slug">): Promise<Buffer> {
+  const { Resvg } = loadResvg();
   const width = 1200;
   const height = 630;
   const safeTitle = escapeXml(truncate(title, 96));
