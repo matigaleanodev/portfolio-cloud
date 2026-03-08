@@ -115,8 +115,8 @@ Current deploy contract:
 - artifacts bucket: `portfolio-cloud-dev-artifacts`
 - artifacts prefix: `sam`
 - native dependencies are built on the Linux CI runner through `sam build`
-- `generate-og` consumes a dedicated Lambda Layer for `sharp`
-- `sharp` stays external to the esbuild bundle and does not ship inside the function artifact
-- the deploy workflow prepares the `sharp` layer explicitly for `linux-x64` before `sam build`
+- `generate-og` resolves `@resvg/resvg-js` as a runtime dependency inside the function artifact
+- OG rendering stays inside the Lambda package and no longer depends on a dedicated native layer
+- the deploy workflow only needs the regular `npm ci` plus `sam build` path
 
 Real deployment still requires environment-specific AWS and provider values that should not be hardcoded in versioned files.

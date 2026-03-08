@@ -1,12 +1,5 @@
-import { createRequire } from "node:module";
+import { Resvg } from "@resvg/resvg-js";
 import type { OgGenerationInput } from "./types";
-
-type SharpModule = typeof import("sharp");
-const requireFromOgModule = createRequire(__filename);
-
-function loadSharp(): SharpModule {
-  return requireFromOgModule("sharp") as SharpModule;
-}
 
 const palette = {
   background: "#e5e7eb",
@@ -58,7 +51,6 @@ export async function generateOgImage({
   tags = [],
   date,
 }: Omit<OgGenerationInput, "slug">): Promise<Buffer> {
-  const sharp = loadSharp();
   const width = 1200;
   const height = 630;
   const safeTitle = escapeXml(truncate(title, 96));
@@ -135,9 +127,14 @@ export async function generateOgImage({
   </svg>
   `;
 
-  const buffer = await sharp(Buffer.from(svg))
-    .png()
-    .toBuffer();
+  const resvg = new Resvg(svg, {
+    fitTo: {
+      mode: "width",
+      value: width,
+    },
+  });
+
+  const buffer = Buffer.from(resvg.render().asPng());
 
   return buffer;
 }

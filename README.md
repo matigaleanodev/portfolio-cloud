@@ -187,7 +187,7 @@ src/
 - `npm run sam:build`: builds Lambda artifacts through AWS SAM and esbuild on the Linux CI runner
 - `npm run sam:deploy:guided`: starts a guided SAM deploy for local environment setup
 
-The deploy workflow prepares a dedicated `sharp` Lambda Layer for the `linux-x64` runtime before building SAM artifacts.
+The deploy workflow builds OG rendering with `@resvg/resvg-js` directly inside the `generate-og` Lambda artifact, without an extra native layer.
 
 ## Infrastructure
 

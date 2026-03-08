@@ -64,14 +64,6 @@ jobs:
       - name: Validate application
         run: npm run ci
 
-      - name: Prepare sharp layer for Lambda runtime
-        env:
-          npm_config_os: linux
-          npm_config_cpu: x64
-          npm_config_libc: glibc
-          NPM_CONFIG_INCLUDE: optional
-        run: npm install --prefix layers/sharp/nodejs --include=optional
-
       - name: Build SAM application
         run: npm run sam:build
 
