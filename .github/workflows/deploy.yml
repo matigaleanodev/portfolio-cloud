@@ -29,6 +29,7 @@ jobs:
     env:
       AWS_REGION: ${{ vars.AWS_REGION }}
       ALLOWED_ORIGIN: https://matiasgaleano.dev
+      DEFAULT_ARTIFACTS_BUCKET: ${{ secrets.PORTFOLIO_CLOUD_ARTIFACTS_BUCKET }}
       R2_ENDPOINT: https://20804625e19c3ff733141d1fa4aa202a.r2.cloudflarestorage.com
       R2_REGION: auto
       R2_BUCKET: portoflio-blog-media
@@ -61,6 +62,10 @@ jobs:
 
           if [ -z "$stack_name" ]; then
             stack_name="portfolio-cloud-${stage}"
+          fi
+
+          if [ -z "$artifacts_bucket" ]; then
+            artifacts_bucket="${DEFAULT_ARTIFACTS_BUCKET}"
           fi
 
           if [ -z "$artifacts_bucket" ]; then
