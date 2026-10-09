@@ -141,4 +141,28 @@ describe("publish-chat-knowledge service", () => {
       body: JSON.stringify({ error: "Valid chat knowledge artifact is required" }),
     });
   });
+
+  it.each([
+    { generatedAt: '2026-10-09T00:00:00Z' },
+    { generatedAt: '2026-10-09T00:00:00Z', projects: [
+      { slug: 'duplicado', title: 'Proyecto', excerpt: 'Descripción' },
+      { slug: 'duplicado', title: 'Otro', excerpt: 'Descripción' },
+    ] },
+    { generatedAt: '2026-10-09T00:00:00Z', projects: [
+      { slug: 'proyecto', title: 'Proyecto', excerpt: 'Descripción', links: [{ label: 'Repo', url: 'javascript:alert(1)' }] },
+    ] },
+  ])('rechaza artifacts incompatibles sin escribir en R2', async (artifact) => {
+    const { publishChatKnowledge } = await import('./publish-chat-knowledge.service');
+    expect((await publishChatKnowledge({ artifact })).statusCode).toBe(400);
+    expect(sendMock).not.toHaveBeenCalled();
+  });
+
+  it('publica duplicados con la misma clave, contenido y checksum', async () => {
+    sendMock.mockResolvedValue({});
+    const { publishChatKnowledge } = await import('./publish-chat-knowledge.service');
+    const event = { artifact: { generatedAt: '2026-10-09T00:00:00Z', projects: [], posts: [] } };
+    await publishChatKnowledge(event);
+    await publishChatKnowledge(event);
+    expect(sendMock.mock.calls[0]?.[0].input).toEqual(sendMock.mock.calls[1]?.[0].input);
+  });
 });

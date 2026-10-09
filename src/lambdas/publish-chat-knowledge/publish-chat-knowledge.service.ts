@@ -14,7 +14,7 @@ import type {
 function getArtifact(
   event: PublishChatKnowledgeEvent,
 ): EditorialKnowledgeArtifact | undefined {
-  return event.artifact;
+  return event?.artifact;
 }
 
 export async function publishChatKnowledge(
