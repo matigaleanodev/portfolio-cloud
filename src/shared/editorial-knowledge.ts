@@ -32,6 +32,16 @@ function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => isNonEmptyString(item));
 }
 
+function isPublicUrl(value: unknown): boolean {
+  if (!isNonEmptyString(value)) return false;
+  try {
+    const url = new URL(value);
+    return ['https:', 'http:'].includes(url.protocol) && !url.username && !url.password;
+  } catch {
+    return false;
+  }
+}
+
 function isKnowledgeLink(value: unknown): value is EditorialKnowledgeLink {
   if (!value || typeof value !== "object" || Array.isArray(value)) {
     return false;
@@ -41,7 +51,7 @@ function isKnowledgeLink(value: unknown): value is EditorialKnowledgeLink {
 
   return (
     isNonEmptyString(candidate.label) &&
-    isNonEmptyString(candidate.url) &&
+    isPublicUrl(candidate.url) &&
     (candidate.icon === undefined || isNonEmptyString(candidate.icon))
   );
 }
@@ -78,7 +88,7 @@ function isPostEntry(value: unknown): value is EditorialPostEntry {
     isNonEmptyString(candidate.excerpt) &&
     isNonEmptyString(candidate.date) &&
     (candidate.tags === undefined || isStringArray(candidate.tags)) &&
-    (candidate.canonicalUrl === undefined || isNonEmptyString(candidate.canonicalUrl)) &&
+    (candidate.canonicalUrl === undefined || isPublicUrl(candidate.canonicalUrl)) &&
     (candidate.summary === undefined || isNonEmptyString(candidate.summary)) &&
     (candidate.searchText === undefined || isNonEmptyString(candidate.searchText))
   );
@@ -95,11 +105,14 @@ export function isEditorialKnowledgeArtifact(
 
   return (
     isNonEmptyString(candidate.generatedAt) &&
+    (candidate.projects !== undefined || candidate.posts !== undefined) &&
     (candidate.projects === undefined ||
       (Array.isArray(candidate.projects) &&
-        candidate.projects.every((entry) => isProjectEntry(entry)))) &&
+        candidate.projects.every((entry) => isProjectEntry(entry)) &&
+        new Set(candidate.projects.map((entry: EditorialProjectEntry) => entry.slug)).size === candidate.projects.length)) &&
     (candidate.posts === undefined ||
-      (Array.isArray(candidate.posts) && candidate.posts.every((entry) => isPostEntry(entry))))
+      (Array.isArray(candidate.posts) && candidate.posts.every((entry) => isPostEntry(entry)) &&
+        new Set(candidate.posts.map((entry: EditorialPostEntry) => entry.slug)).size === candidate.posts.length))
   );
 }
 

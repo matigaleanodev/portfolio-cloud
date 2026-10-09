@@ -126,6 +126,14 @@ El payload fuente sigue siendo el artifact editorial generado por `portfolio`, m
 
 Esto mantiene aislado a `process-release` del handoff del conocimiento del chat para no cargar riesgo no relacionado sobre una Lambda de release ya validada.
 
+### Validación del contrato de conocimiento del chat
+
+El publicador v1 exige al menos una colección projects/posts, rechaza slugs duplicados dentro de cada colección y acepta solo enlaces HTTP(S) absolutos sin credenciales embebidas. Publicar dos veces el mismo artifact escribe la misma clave y envelope; este contrato no ordena invocaciones concurrentes. La API verifica el contentHash existente sobre el objeto knowledge normalizado antes de consumir un envelope. No se requiere migración de schema.
+
+La validación entre repos está en `portfolio-api/scripts/evaluate-chat.cjs --contract`, después de instalar los tres repos y compilar API/cloud. Ejecuta el productor del frontend en un temporal y pasa su salida por el constructor cloud y el lector API reales, sin publicar ni llamar al modelo. Regenerar cambia generatedAt y por lo tanto el hash aunque los facts editoriales no cambien.
+
+Desplegar publicador compatible y API antes de habilitar history opcional en frontend. Recuperar facts republicando un payload anterior verificado mediante el publicador; recuperar código desplegando la versión anterior. La API puede conservar conocimiento cacheado hasta su TTL configurado o un reinicio. Ver `portfolio-api/docs/chat-audit.es.md` y su versión inglesa para evidencia de octubre de 2026, contrato, handoff frontend y límites de evaluación.
+
 ## Validacion de despliegue
 
 El repositorio soporta actualmente dos capas de validacion antes de un deploy real:
