@@ -84,4 +84,4 @@ Environment setup is documented in `.env.example`.
 
 ## Version
 
-Current application version: **1.0.0**
+Current application version: **1.0.1**

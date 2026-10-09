@@ -1,6 +1,6 @@
 {
   "name": "portfolio-cloud",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Serverless cloud automation for portfolio and blog (AWS Lambda)",
   "scripts": {
     "dev:og": "ts-node src/dev/run-og.ts",
