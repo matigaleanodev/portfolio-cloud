@@ -58,6 +58,14 @@ describe("notify-post service", () => {
     });
   });
 
+  it("propaga el rechazo del proveedor en lugar de confirmar la notificación", async () => {
+    listSubscriberEmailsMock.mockResolvedValue(["audit@example.com"]);
+    sendBlogNotificationMock.mockRejectedValue(new Error("Rate limit exceeded"));
+    const { notifyPost } = await import("./notify.service");
+    await expect(notifyPost({ title: "Prueba", url: "https://example.com/post" }))
+      .rejects.toThrow("Rate limit exceeded");
+  });
+
   it("returns 400 when title or url are missing", async () => {
     const { notifyPost } = await import("./notify.service");
 
