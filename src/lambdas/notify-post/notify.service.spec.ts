@@ -12,6 +12,13 @@ vi.mock("../../shared/email", () => ({
 }));
 
 describe("notify-post service", () => {
+  it("rechaza una fecha futura antes de leer suscriptores o mandar mails", async () => {
+    const { notifyPost } = await import("./notify.service");
+    const response = await notifyPost({ title: "Programado", url: "https://matiasgaleano.dev/blog/programado", date: "2999-01-01" });
+    expect(response.statusCode).toBe(400);
+    expect(listSubscriberEmailsMock).not.toHaveBeenCalled();
+    expect(sendBlogNotificationMock).not.toHaveBeenCalled();
+  });
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();

@@ -1,6 +1,7 @@
 import { GetObjectCommand, PutObjectCommand } from "@aws-sdk/client-s3";
 import type { Readable } from "node:stream";
 import { jsonResponse } from "../../shared/lambda";
+import { isPublicationDue } from "../../shared/publication";
 import { logError, logInfo } from "../../shared/logger";
 import { getEnv, requireEnv } from "../../shared/env";
 import { assertLambdaSuccess, invokeLambda } from "../../shared/invoke-lambda";
@@ -421,6 +422,10 @@ export async function processRelease(
 
   if (!isReleaseManifest(manifest)) {
     return jsonResponse(400, { error: "Valid manifest is required" });
+  }
+
+  if (manifest.content.posts.some((post) => !isPublicationDue(post.date))) {
+    return jsonResponse(400, { error: "Manifest contains invalid or future publication dates" });
   }
 
   const processedState = await loadProcessedPostsState();

@@ -1,4 +1,5 @@
 import { sendBlogNotification } from "../../shared/email";
+import { isPublicationDue } from "../../shared/publication";
 import { logInfo } from "../../shared/logger";
 import { jsonResponse } from "../../shared/lambda";
 import { listSubscriberEmails } from "../../shared/subscribers";
@@ -35,6 +36,10 @@ export async function notifyPost(event: NotifyPostEvent): Promise<LambdaResponse
 
   if (!input) {
     return jsonResponse(400, { error: "Title and url are required" });
+  }
+
+  if (input.date !== undefined && !isPublicationDue(input.date)) {
+    return jsonResponse(400, { error: "Post publication date is invalid or in the future" });
   }
 
   logInfo("Sending post notification", { title: input.title });
