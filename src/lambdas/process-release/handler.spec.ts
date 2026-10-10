@@ -16,6 +16,16 @@ vi.mock("../../shared/invoke-lambda", () => ({
 }));
 
 describe("process-release handler", () => {
+  it("rechaza un manifiesto futuro sin leer estado ni invocar Lambdas", async () => {
+    const { handler } = await import("./handler");
+    const response = await handler({
+      generatedAt: new Date().toISOString(), siteUrl: "https://matiasgaleano.dev",
+      content: { posts: [{ slug: "scheduled", title: "Programado", date: "2999-01-01", canonicalPath: "/blog/scheduled" }] },
+    });
+    expect(response.statusCode).toBe(400);
+    expect(sendMock).not.toHaveBeenCalled();
+    expect(invokeLambdaMock).not.toHaveBeenCalled();
+  });
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();

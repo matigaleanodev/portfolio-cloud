@@ -10,6 +10,16 @@ vi.mock("../../shared/s3", () => ({
 }));
 
 describe("publish-chat-knowledge service", () => {
+  it("rechaza posts futuros antes de publicar conocimiento en R2", async () => {
+    const { publishChatKnowledge } = await import("./publish-chat-knowledge.service");
+    const response = await publishChatKnowledge({ artifact: {
+      generatedAt: new Date().toISOString(), projects: [], posts: [
+        { slug: "scheduled", title: "Programado", excerpt: "Resumen", date: "2999-01-01" },
+      ],
+    } });
+    expect(response.statusCode).toBe(400);
+    expect(sendMock).not.toHaveBeenCalled();
+  });
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();

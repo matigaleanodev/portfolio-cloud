@@ -9,7 +9,10 @@ import { logInfo } from "./logger";
 import { s3 } from "./s3";
 import type { Subscriber } from "./types";
 
-const bucket = requireEnv("R2_BUCKET");
+const bucket = requireEnv("SUBSCRIBERS_BUCKET");
+if (bucket === requireEnv("R2_BUCKET")) {
+  throw new Error("SUBSCRIBERS_BUCKET must differ from the public R2_BUCKET");
+}
 const subscribersPrefix = "subscribers/";
 const subscriberFileSuffix = ".json";
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -18,7 +21,7 @@ type SubscriberDeleteResult = "deleted" | "missing";
 type SubscriberCreateResult = "created" | "exists";
 
 export function normalizeSubscriberEmail(email: string): string {
-  return decodeURIComponent(email).trim().toLowerCase();
+  return email.trim().toLowerCase();
 }
 
 export function isValidSubscriberEmail(email: string): boolean {

@@ -12,6 +12,13 @@ vi.mock("../../shared/email", () => ({
 }));
 
 describe("notify-post service", () => {
+  it("rechaza una fecha futura antes de leer suscriptores o mandar mails", async () => {
+    const { notifyPost } = await import("./notify.service");
+    const response = await notifyPost({ title: "Programado", url: "https://matiasgaleano.dev/blog/programado", date: "2999-01-01" });
+    expect(response.statusCode).toBe(400);
+    expect(listSubscriberEmailsMock).not.toHaveBeenCalled();
+    expect(sendBlogNotificationMock).not.toHaveBeenCalled();
+  });
   beforeEach(() => {
     vi.resetModules();
     vi.clearAllMocks();
@@ -49,6 +56,14 @@ describe("notify-post service", () => {
       date: "2026-03-08",
       tags: ["aws", "cloud"],
     });
+  });
+
+  it("propaga el rechazo del proveedor en lugar de confirmar la notificación", async () => {
+    listSubscriberEmailsMock.mockResolvedValue(["audit@example.com"]);
+    sendBlogNotificationMock.mockRejectedValue(new Error("Rate limit exceeded"));
+    const { notifyPost } = await import("./notify.service");
+    await expect(notifyPost({ title: "Prueba", url: "https://example.com/post" }))
+      .rejects.toThrow("Rate limit exceeded");
   });
 
   it("returns 400 when title or url are missing", async () => {

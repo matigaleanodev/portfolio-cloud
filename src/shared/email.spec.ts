@@ -23,7 +23,7 @@ describe("shared/email", () => {
   });
 
   it("builds the notification payload with escaped content and tags", async () => {
-    sendMock.mockResolvedValue({ id: "email_123" });
+    sendMock.mockResolvedValue({ data: { id: "email_123" }, error: null });
 
     const { sendBlogNotification } = await import("./email");
 
@@ -36,7 +36,7 @@ describe("shared/email", () => {
         date: "2026-03-08",
         tags: ["aws", "serverless", "blog", "cloud", "extra"],
       }),
-    ).resolves.toEqual({ id: "email_123" });
+    ).resolves.toEqual({ data: { id: "email_123" }, error: null });
 
     expect(sendMock).toHaveBeenCalledTimes(1);
     expect(sendMock.mock.calls[0]?.[0]).toMatchObject({
@@ -67,8 +67,16 @@ describe("shared/email", () => {
     expect(payload.html).not.toContain("extra");
   });
 
+  it("rechaza el error que Resend devuelve en una promesa resuelta", async () => {
+    sendMock.mockResolvedValue({ data: null, error: { message: "Rate limit exceeded" } });
+    const { sendBlogNotification } = await import("./email");
+    await expect(sendBlogNotification({
+      to: "audit@example.com", title: "Prueba", url: "https://example.com/post",
+    })).rejects.toThrow("Rate limit exceeded");
+  });
+
   it("falls back cleanly when excerpt and date are missing", async () => {
-    sendMock.mockResolvedValue({ id: "email_456" });
+    sendMock.mockResolvedValue({ data: { id: "email_456" }, error: null });
 
     const { sendBlogNotification } = await import("./email");
 

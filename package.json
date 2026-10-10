@@ -1,8 +1,9 @@
 {
   "name": "portfolio-cloud",
-  "version": "1.0.1",
+  "version": "1.3.0",
   "description": "Serverless cloud automation for portfolio and blog (AWS Lambda)",
   "scripts": {
+    "migrate:subscribers": "ts-node src/dev/migrate-subscribers.ts",
     "dev:og": "ts-node src/dev/run-og.ts",
     "dev:og:preview": "ts-node src/dev/render-og.ts",
     "dev:notify": "ts-node src/dev/run-notify.ts",

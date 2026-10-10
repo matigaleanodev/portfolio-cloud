@@ -19,6 +19,9 @@ Parameters:
   R2Bucket:
     Type: String
     Default: portoflio-blog-media
+  SubscribersBucket:
+    Type: String
+    Default: portfolio-blog-subscribers
   R2AccessKeyId:
     Type: String
     NoEcho: true
@@ -58,6 +61,7 @@ Globals:
         R2_ENDPOINT: !Ref R2Endpoint
         R2_REGION: !Ref R2Region
         R2_BUCKET: !Ref R2Bucket
+        SUBSCRIBERS_BUCKET: !Ref SubscribersBucket
         R2_ACCESS_KEY_ID: !Ref R2AccessKeyId
         R2_SECRET_ACCESS_KEY: !Ref R2SecretAccessKey
         OG_OBJECT_PREFIX: !Ref OgObjectPrefix
