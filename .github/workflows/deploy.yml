@@ -33,6 +33,7 @@ jobs:
       R2_ENDPOINT: https://20804625e19c3ff733141d1fa4aa202a.r2.cloudflarestorage.com
       R2_REGION: auto
       R2_BUCKET: portoflio-blog-media
+      SUBSCRIBERS_BUCKET: ${{ vars.PORTFOLIO_CLOUD_SUBSCRIBERS_BUCKET || 'portfolio-blog-subscribers' }}
       R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
       R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
       OG_OBJECT_PREFIX: og
@@ -117,6 +118,7 @@ jobs:
           "R2Endpoint=${R2_ENDPOINT}"
           "R2Region=${R2_REGION}"
           "R2Bucket=${R2_BUCKET}"
+          "SubscribersBucket=${SUBSCRIBERS_BUCKET}"
           "R2AccessKeyId=${R2_ACCESS_KEY_ID}"
           "R2SecretAccessKey=${R2_SECRET_ACCESS_KEY}"
           "OgObjectPrefix=${OG_OBJECT_PREFIX}"
