@@ -52,11 +52,11 @@ El stack inicial define:
 
 Naming actual de despliegue:
 
-- nombre del stack para el ambiente activo: `portfolio-cloud-dev`
+- nombre del stack para el ambiente activo: `portfolio-cloud-prod`
 - patron de nombres de Lambda: `portfolio-cloud-<environment>-<service>`
-- ambiente actual: `dev`
-- nombre previsto del stack de produccion: `portfolio-cloud-prod`
-- bucket de artifacts del ambiente activo: `portfolio-cloud-dev-artifacts`
+- ambiente actual: `prod`
+- stage reservado para pruebas: `dev`
+- bucket de artifacts del ambiente activo: `portfolio-cloud-prod-artifacts-650387442642-us-east-1-an`
 
 Target operativo de despliegue:
 
@@ -152,7 +152,7 @@ El workflow de deploy de GitHub usa un bucket dedicado de artifacts en lugar de 
 Contrato actual de deploy:
 
 - nombre del stack: `portfolio-cloud-dev`
-- bucket de artifacts: `portfolio-cloud-dev-artifacts`
+- bucket de artifacts: `portfolio-cloud-prod-artifacts-650387442642-us-east-1-an`
 - prefijo de artifacts: `sam`
 - las dependencias nativas se construyen en el runner Linux de CI mediante `sam build`
 - `generate-og` usa un build dedicado de SAM makefile en lugar del camino default por metadata de esbuild
@@ -160,3 +160,13 @@ Contrato actual de deploy:
 - el workflow de deploy debe mantener `npm ci --include=optional` antes de `sam build`
 
 El despliegue real sigue requiriendo valores de AWS y de proveedores por ambiente, que no deben quedar hardcodeados en archivos versionados.
+
+## Publicación programada
+
+`portfolio` controla el build/deploy diario (09:17 Argentina) y excluye posts futuros de los artifacts públicos. Cloud corre después del deploy exitoso de Firebase; no programa los mails por separado. `process-release` y `publish-chat-knowledge` rechazan todo el payload antes de producir efectos si algún post tiene fecha inválida o futura en `America/Argentina/Buenos_Aires`. `notify-post` aplica el mismo control cuando recibe fecha. Desplegar estas protecciones antes del cron del frontend. Se reutiliza el estado de posts procesados; una entrega parcial de mails todavía puede duplicar destinatarios al reintentar. Ver `Docs/scheduled-publication.es.md` del frontend para activación y recuperación.
+
+## Almacenamiento privado de suscriptores
+
+Los objetos de suscriptores usan `SUBSCRIBERS_BUCKET`, obligatorio y separado del bucket público de media `R2_BUCKET`. El runtime rechaza nombres iguales y no vuelve al almacenamiento público como fallback. SAM expone `SubscribersBucket`; el workflow usa `PORTFOLIO_CLOUD_SUBSCRIBERS_BUCKET` (por defecto `portfolio-blog-subscribers`). Las credenciales R2 necesitan acceso a objetos del bucket privado; no se debe habilitar su URL pública de desarrollo ni un dominio público.
+
+Antes de desplegar, seguir [el procedimiento de migración](subscriber-migration.es.md). Cambiar código/configuración no elimina las copias ya públicas. Una respuesta de rechazo de Resend ahora hace fallar la notificación aunque el SDK resuelva su promesa: el post queda pendiente de reintento, sin persistir `notifiedAt`.

@@ -85,3 +85,5 @@ La configuración de entorno está documentada en `.env.example`.
 ## Version
 
 Versión actual de la aplicación: **1.0.1**
+
+El almacenamiento privado de suscriptores requiere seguir el [procedimiento de migración](Docs/subscriber-migration.es.md) antes de desplegar sobre una instalación que use el bucket público.

@@ -85,3 +85,5 @@ Environment setup is documented in `.env.example`.
 ## Version
 
 Current application version: **1.0.1**
+
+Private subscriber storage requires the [migration procedure](Docs/subscriber-migration.md) before deploying over an existing public-bucket installation.
