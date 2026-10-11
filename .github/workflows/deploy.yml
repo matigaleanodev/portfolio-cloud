@@ -6,6 +6,14 @@ on:
       - main
   workflow_dispatch:
     inputs:
+      plan_only:
+        description: Create a changeset for review without executing it
+        type: boolean
+        default: false
+      reviewed_change_set:
+        description: ARN of a previously reviewed changeset to execute
+        type: string
+        default: ""
       stage:
         description: Deployment stage name
         required: false
@@ -131,12 +139,14 @@ jobs:
           [[ "$AWS_REGION" == "us-east-1" ]] || exit 1
 
       - name: Deploy SAM stack
+        if: inputs.reviewed_change_set == ''
         env:
+          PLAN_ONLY: ${{ inputs.plan_only }}
           R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         run: >
-          sam deploy
+          sam deploy $([ "$PLAN_ONLY" != "true" ] || printf '%s' '--no-execute-changeset')
           --template-file .aws-sam/build/template.yaml
           --stack-name "${STACK_NAME}"
           --region "${AWS_REGION}"
@@ -161,6 +171,19 @@ jobs:
           "MediaBaseUrl=${MEDIA_BASE_URL}"
           "BlogFromEmail=${BLOG_FROM_EMAIL}"
           "ResendApiKey=${RESEND_API_KEY}"
+
+      - name: Execute reviewed changeset
+        if: inputs.reviewed_change_set != ''
+        env:
+          REVIEWED_CHANGE_SET: ${{ inputs.reviewed_change_set }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$REVIEWED_CHANGE_SET" =~ ^arn:aws:cloudformation:us-east-1:650387442642:changeSet/[a-zA-Z0-9-]+/[a-zA-Z0-9-]+$ ]] || exit 1
+          [[ "${{ inputs.plan_only }}" != "true" ]] || exit 1
+          aws cloudformation describe-change-set --stack-name "$STACK_NAME" --change-set-name "$REVIEWED_CHANGE_SET" --query '{Status:Status,ExecutionStatus:ExecutionStatus,Changes:Changes}' --output json
+          aws cloudformation execute-change-set --stack-name "$STACK_NAME" --change-set-name "$REVIEWED_CHANGE_SET"
+          aws cloudformation wait stack-update-complete --stack-name "$STACK_NAME"
 
       - name: Export stack outputs
         shell: bash
