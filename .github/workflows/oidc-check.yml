@@ -1,0 +1,25 @@
+name: Validate production OIDC identity
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  identity:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Assume dedicated pipeline role
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::650387442642:role/PortfolioCloudGitHubDeployRole
+          aws-region: us-east-1
+          role-session-name: OIDCValidation-${{ github.run_id }}
+      - name: Verify identity and read production stack
+        shell: bash
+        run: |
+          set -euo pipefail
+          identity=$(aws sts get-caller-identity --output json)
+          jq -e '.Account == "650387442642" and (.Arn | startswith("arn:aws:sts::650387442642:assumed-role/PortfolioCloudGitHubDeployRole/"))' <<< "$identity"
+          aws cloudformation describe-stacks --stack-name portfolio-cloud-prod --region us-east-1 --query 'Stacks[0].{Name:StackName,Status:StackStatus}' --output json
