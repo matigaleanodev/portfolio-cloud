@@ -5,8 +5,17 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+
+env:
+  AWS_REGION: us-east-1
+  AWS_DEFAULT_REGION: us-east-1
+  SAM_CLI_TELEMETRY: '0'
+
 jobs:
   validate:
+    timeout-minutes: 20
     runs-on: ubuntu-latest
 
     steps:

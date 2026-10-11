@@ -87,3 +87,10 @@ La configuración de entorno está documentada en `.env.example`.
 Versión actual de la aplicación: **1.3.0**
 
 El almacenamiento privado de suscriptores requiere seguir el [procedimiento de migración](Docs/subscriber-migration.es.md) antes de desplegar sobre una instalación que use el bucket público.
+
+
+## Acceso AWS y controles de despliegue
+
+Usar el perfil SSO architect para desarrollo en la cuenta personal 650387442642 (us-east-1), observer para consulta y highlord solo para administración autorizada explícitamente. El despliegue corre únicamente desde main, valida inputs y templates, serializa ejecuciones SAM y verifica la identidad de destino. Los secretos runtime se exponen solo al paso deploy.
+
+El workflow de esta rama usa `PortfolioCloudGitHubDeployRole` y pasa `PortfolioCloudCloudFormationExecutionRole` a SAM. Ambos están limitados a producción en us-east-1; los seis roles runtime declaran `PortfolioCloudRuntimeBoundary`. La prueba OIDC de main pasó el 11/10/2026. La migración productiva sigue pendiente: `MigrationBoundaryGate` impide ejecutar changesets hasta aplicar y verificar las seis boundaries con aprobación. `cloud_actions` conserva sus permisos durante la recuperación y requiere una confirmación separada para retirarlos.

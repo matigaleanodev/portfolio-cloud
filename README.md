@@ -87,3 +87,10 @@ Environment setup is documented in `.env.example`.
 Current application version: **1.3.0**
 
 Private subscriber storage requires the [migration procedure](Docs/subscriber-migration.md) before deploying over an existing public-bucket installation.
+
+
+## AWS access and deployment controls
+
+Use the architect SSO profile for development in personal account 650387442642 (us-east-1), observer for inspection and explicitly authorized highlord administration only. Deployment runs only from main, validates inputs and templates, serializes SAM deployments and checks the target identity. Runtime secrets are exposed only to the deploy step.
+
+This branch uses `PortfolioCloudGitHubDeployRole` and passes `PortfolioCloudCloudFormationExecutionRole` to SAM. Both target production in us-east-1; all six runtime roles declare `PortfolioCloudRuntimeBoundary`. The main OIDC check passed on 2026-10-11. Production migration remains pending: `MigrationBoundaryGate` denies changeset execution until the six boundaries are approved, applied and verified. `cloud_actions` retains its recovery permissions until separately approved removal.
