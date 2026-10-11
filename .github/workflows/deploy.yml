@@ -19,29 +19,37 @@ on:
         required: false
         default: ""
 
+permissions:
+  contents: read
+
+concurrency:
+  group: portfolio-cloud-deployment
+  cancel-in-progress: false
+
 jobs:
   deploy:
+    if: github.ref == 'refs/heads/main'
+    timeout-minutes: 30
     runs-on: ubuntu-latest
     permissions:
       contents: read
       id-token: write
 
     env:
-      AWS_REGION: ${{ vars.AWS_REGION }}
+      AWS_REGION: us-east-1
       ALLOWED_ORIGIN: https://matiasgaleano.dev
-      DEFAULT_ARTIFACTS_BUCKET: ${{ secrets.PORTFOLIO_CLOUD_ARTIFACTS_BUCKET }}
+      INPUT_STAGE: ${{ inputs.stage }}
+      INPUT_STACK_NAME: ${{ inputs.stack_name }}
+      INPUT_ARTIFACTS_BUCKET: ${{ inputs.artifacts_bucket }}
       R2_ENDPOINT: https://20804625e19c3ff733141d1fa4aa202a.r2.cloudflarestorage.com
       R2_REGION: auto
       R2_BUCKET: portoflio-blog-media
       SUBSCRIBERS_BUCKET: ${{ vars.PORTFOLIO_CLOUD_SUBSCRIBERS_BUCKET || 'portfolio-blog-subscribers' }}
-      R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-      R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
       OG_OBJECT_PREFIX: og
       CHAT_KNOWLEDGE_OBJECT_KEY: ${{ vars.PORTFOLIO_CLOUD_CHAT_KNOWLEDGE_OBJECT_KEY || 'artifacts/chat/knowledge.json' }}
       RELEASE_STAGE_MAX_ATTEMPTS: ${{ vars.PORTFOLIO_CLOUD_RELEASE_STAGE_MAX_ATTEMPTS || '2' }}
       MEDIA_BASE_URL: https://media.matiasgaleano.dev
       BLOG_FROM_EMAIL: blog@matiasgaleano.dev
-      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
       ARTIFACTS_PREFIX: sam
 
     steps:
@@ -49,13 +57,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Resolve deployment target
+        env:
+          DEFAULT_ARTIFACTS_BUCKET: ${{ secrets.PORTFOLIO_CLOUD_ARTIFACTS_BUCKET }}
         shell: bash
         run: |
           set -euo pipefail
 
-          stage="${{ github.event.inputs.stage }}"
-          stack_name="${{ github.event.inputs.stack_name }}"
-          artifacts_bucket="${{ github.event.inputs.artifacts_bucket }}"
+          stage="$INPUT_STAGE"
+          stack_name="$INPUT_STACK_NAME"
+          artifacts_bucket="$INPUT_ARTIFACTS_BUCKET"
 
           if [ -z "$stage" ]; then
             stage="prod"
@@ -70,8 +80,13 @@ jobs:
           fi
 
           if [ -z "$artifacts_bucket" ]; then
-            artifacts_bucket="portfolio-cloud-${stage}-artifacts"
+            artifacts_bucket="portfolio-cloud-prod-artifacts-650387442642-us-east-1-an"
           fi
+
+          [[ "$stage" == "prod" ]] || { echo "Stage inválido" >&2; exit 1; }
+          [[ "$stack_name" == "portfolio-cloud-${stage}" ]] || { echo "Stack fuera del proyecto" >&2; exit 1; }
+          [[ "$artifacts_bucket" == "portfolio-cloud-prod-artifacts-650387442642-us-east-1-an" ]] || { echo "Bucket inválido" >&2; exit 1; }
+          [[ "$AWS_REGION" == "us-east-1" ]] || { echo "Región inesperada" >&2; exit 1; }
 
           echo "DEPLOY_STAGE=$stage" >> "$GITHUB_ENV"
           echo "STACK_NAME=$stack_name" >> "$GITHUB_ENV"
@@ -89,19 +104,37 @@ jobs:
       - name: Setup AWS SAM
         uses: aws-actions/setup-sam@v2
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v4
-        with:
-          role-to-assume: ${{ secrets.AWS_ROLE_TO_ASSUME }}
-          aws-region: ${{ env.AWS_REGION }}
-
       - name: Validate application
         run: npm run ci
 
       - name: Build SAM application
         run: npm run sam:build
 
+      - name: Validate SAM template
+        run: npm run sam:validate
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::650387442642:role/PortfolioCloudGitHubDeployRole
+          aws-region: ${{ env.AWS_REGION }}
+          role-session-name: GitHubActions-${{ github.run_id }}
+
+      - name: Verify deployment identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          account_id=$(aws sts get-caller-identity --query Account --output text)
+          [[ "$account_id" == "650387442642" ]] || exit 1
+          caller_arn=$(aws sts get-caller-identity --query Arn --output text)
+          [[ "$caller_arn" == arn:aws:sts::650387442642:assumed-role/PortfolioCloudGitHubDeployRole/* ]] || exit 1
+          [[ "$AWS_REGION" == "us-east-1" ]] || exit 1
+
       - name: Deploy SAM stack
+        env:
+          R2_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          R2_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
         run: >
           sam deploy
           --template-file .aws-sam/build/template.yaml
@@ -109,6 +142,7 @@ jobs:
           --region "${AWS_REGION}"
           --s3-bucket "${ARTIFACTS_BUCKET}"
           --s3-prefix "${ARTIFACTS_PREFIX}"
+          --role-arn arn:aws:iam::650387442642:role/PortfolioCloudCloudFormationExecutionRole
           --capabilities CAPABILITY_IAM
           --no-confirm-changeset
           --no-fail-on-empty-changeset

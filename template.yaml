@@ -88,6 +88,7 @@ Resources:
   SubscribeFunction:
     Type: AWS::Serverless::Function
     Properties:
+      PermissionsBoundary: arn:aws:iam::650387442642:policy/PortfolioCloudRuntimeBoundary
       FunctionName: !Sub portfolio-cloud-${StageName}-subscribe
       CodeUri: .
       Handler: src/lambdas/subscribe/handler.handler
@@ -114,6 +115,7 @@ Resources:
   UnsubscribeFunction:
     Type: AWS::Serverless::Function
     Properties:
+      PermissionsBoundary: arn:aws:iam::650387442642:policy/PortfolioCloudRuntimeBoundary
       FunctionName: !Sub portfolio-cloud-${StageName}-unsubscribe
       CodeUri: .
       Handler: src/lambdas/unsubscribe/handler.handler
@@ -140,6 +142,7 @@ Resources:
   GenerateOgFunction:
     Type: AWS::Serverless::Function
     Properties:
+      PermissionsBoundary: arn:aws:iam::650387442642:policy/PortfolioCloudRuntimeBoundary
       FunctionName: !Sub portfolio-cloud-${StageName}-generate-og
       CodeUri: .
       Handler: src/lambdas/generate-og/handler.handler
@@ -152,6 +155,7 @@ Resources:
   NotifyPostFunction:
     Type: AWS::Serverless::Function
     Properties:
+      PermissionsBoundary: arn:aws:iam::650387442642:policy/PortfolioCloudRuntimeBoundary
       FunctionName: !Sub portfolio-cloud-${StageName}-notify-post
       CodeUri: .
       Handler: src/lambdas/notify-post/handler.handler
@@ -172,6 +176,7 @@ Resources:
   ProcessReleaseFunction:
     Type: AWS::Serverless::Function
     Properties:
+      PermissionsBoundary: arn:aws:iam::650387442642:policy/PortfolioCloudRuntimeBoundary
       FunctionName: !Sub portfolio-cloud-${StageName}-process-release
       CodeUri: .
       Handler: src/lambdas/process-release/handler.handler
@@ -204,6 +209,7 @@ Resources:
   PublishChatKnowledgeFunction:
     Type: AWS::Serverless::Function
     Properties:
+      PermissionsBoundary: arn:aws:iam::650387442642:policy/PortfolioCloudRuntimeBoundary
       FunctionName: !Sub portfolio-cloud-${StageName}-publish-chat-knowledge
       CodeUri: .
       Handler: src/lambdas/publish-chat-knowledge/handler.handler
