@@ -132,7 +132,7 @@ El publicador v1 exige al menos una colección projects/posts, rechaza slugs dup
 
 La validación entre repos está en `portfolio-api/scripts/evaluate-chat.cjs --contract`, después de instalar los tres repos y compilar API/cloud. Ejecuta el productor del frontend en un temporal y pasa su salida por el constructor cloud y el lector API reales, sin publicar ni llamar al modelo. Regenerar cambia generatedAt y por lo tanto el hash aunque los facts editoriales no cambien.
 
-Desplegar publicador compatible y API antes de habilitar history opcional en frontend. Recuperar facts republicando un payload anterior verificado mediante el publicador; recuperar código desplegando la versión anterior. La API puede conservar conocimiento cacheado hasta su TTL configurado o un reinicio. Ver `portfolio-api/docs/chat-audit.es.md` y su versión inglesa para evidencia de octubre de 2026, contrato, handoff frontend y límites de evaluación.
+Desplegar publicador compatible y API antes de habilitar history opcional en frontend. Recuperar facts republicando un payload anterior verificado mediante el publicador; recuperar código desplegando la versión anterior. La API puede conservar conocimiento cacheado hasta su TTL configurado o un reinicio.
 
 ## Validacion de despliegue
 
