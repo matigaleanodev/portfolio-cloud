@@ -132,7 +132,7 @@ The v1 publisher requires at least one projects/posts collection, rejects duplic
 
 Cross-repository validation is available in `portfolio-api/scripts/evaluate-chat.cjs --contract` after installing all three repositories and building API/cloud. It runs the frontend producer in a temporary directory and passes its output through the actual cloud builder and API reader without publishing or calling the model. Regeneration changes generatedAt and therefore the hash even when editorial facts are unchanged.
 
-Deploy the compatible publisher and API before enabling optional history in the frontend. Recover facts by republishing a previously verified payload through the publisher; recover code by redeploying the previous release. The API may retain cached knowledge until its configured TTL or restart. See `portfolio-api/docs/chat-audit.md` and its Spanish counterpart for the October 2026 evidence, contract, frontend handoff and evaluation limitations.
+Deploy the compatible publisher and API before enabling optional history in the frontend. Recover facts by republishing a previously verified payload through the publisher; recover code by redeploying the previous release. The API may retain cached knowledge until its configured TTL or restart.
 
 ## Deployment validation
 
